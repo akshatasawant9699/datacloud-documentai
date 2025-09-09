@@ -5,7 +5,7 @@ public class ProcessInternetInvoice {
     private static final String CONTENT_TYPE = 'application/json';
     
     // OAuth 2.0 credentials for authentication
-    private static final String LOGIN_URL = 'https://akshatasaw-250204-730-demo.my.salesforce.com';
+    private static final String LOGIN_URL = '<salesforce_instance_url>';
     private static final String CLIENT_ID = '<client_id>';
     private static final String CLIENT_SECRET = '<client_secret>';
     

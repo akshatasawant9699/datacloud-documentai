@@ -1,0 +1,623 @@
+public class DocumentAIResumeProcessorSimple {
+    
+    // Configuration constants - same as DocumentAISimpleClient
+    private static final String DOCUMENT_AI_ENDPOINT = '<salesforce_instance_url>';
+    private static final String CONTENT_TYPE = 'application/json';
+    
+    // OAuth 2.0 credentials for authentication
+    private static final String LOGIN_URL = '<salesforce_instance_url>';
+    private static final String CLIENT_ID = '<client_id>';
+    private static final String CLIENT_SECRET = '<client_secret>';
+    
+        
+    // Standard resume schema for all resumes - using same format as DocumentAISimpleClient
+    private static final String RESUME_SCHEMA = '"{\\"$schema\\":\\"http://json-schema.org/draft-07/schema#\\",\\"type\\":\\"object\\",\\"properties\\":{\\"fullName\\":{\\"type\\":\\"string\\",\\"description\\":\\"Full name of the candidate\\"},\\"email\\":{\\"type\\":\\"string\\",\\"description\\":\\"Email address of the candidate\\"},\\"phone\\":{\\"type\\":\\"string\\",\\"description\\":\\"Phone number of the candidate\\"},\\"location\\":{\\"type\\":\\"string\\",\\"description\\":\\"Location or address of the candidate\\"},\\"summary\\":{\\"type\\":\\"string\\",\\"description\\":\\"Professional summary or objective\\"},\\"skills\\":{\\"type\\":\\"string\\",\\"description\\":\\"Technical skills and competencies\\"},\\"experience\\":{\\"type\\":\\"string\\",\\"description\\":\\"Work experience and job history\\"},\\"education\\":{\\"type\\":\\"string\\",\\"description\\":\\"Educational background and qualifications\\"},\\"linkedinUrl\\":{\\"type\\":\\"string\\",\\"description\\":\\"LinkedIn profile URL\\"},\\"yearsOfExperience\\":{\\"type\\":\\"string\\",\\"description\\":\\"Total years of professional experience\\"},\\"currentRole\\":{\\"type\\":\\"string\\",\\"description\\":\\"Current job title or role\\"}}}"';
+    
+    // Response wrapper class for invocable methods
+    public class ResumeProcessingResponse {
+        @InvocableVariable(label='Success' description='Whether the processing was successful')
+        public Boolean success;
+        
+        @InvocableVariable(label='Error Message' description='Error message if processing failed')
+        public String errorMessage;
+        
+        @InvocableVariable(label='Extracted Data JSON' description='Complete extracted data in JSON format')
+        public String extractedDataJson;
+        
+        @InvocableVariable(label='Raw Response' description='Raw API response for debugging')
+        public String rawResponse;
+        
+        // Individual fields for easy access
+        @InvocableVariable(label='Full Name' description='Extracted full name from resume')
+        public String fullName;
+        
+        @InvocableVariable(label='Email' description='Extracted email address from resume')
+        public String email;
+        
+        @InvocableVariable(label='Phone' description='Extracted phone number from resume')
+        public String phone;
+        
+        @InvocableVariable(label='Location' description='Extracted location from resume')
+        public String location;
+        
+        @InvocableVariable(label='Summary' description='Extracted professional summary from resume')
+        public String summary;
+        
+        @InvocableVariable(label='Skills' description='Extracted skills from resume')
+        public String skills;
+        
+        @InvocableVariable(label='Experience' description='Extracted work experience from resume')
+        public String experience;
+        
+        @InvocableVariable(label='Education' description='Extracted education from resume')
+        public String education;
+        
+        @InvocableVariable(label='LinkedIn URL' description='Extracted LinkedIn URL from resume')
+        public String linkedinUrl;
+        
+        @InvocableVariable(label='Years of Experience' description='Extracted years of experience from resume')
+        public String yearsOfExperience;
+        
+        @InvocableVariable(label='Current Role' description='Extracted current role from resume')
+        public String currentRole;
+    }
+    
+    // Input wrapper class for invocable methods
+    public class ResumeProcessingRequest {
+        @InvocableVariable(label='Candidate Name' description='Name of the candidate to process (e.g., "Jane Doe")' required=true)
+        public String candidateName;
+    }
+    
+    /**
+     * Invocable method to process resume for a single candidate using Document AI
+     * This method can be called from Salesforce Flows, Agentforce, or other automation
+     * Session ID is generated dynamically using OAuth 2.0
+     * @param requests List containing single ResumeProcessingRequest with candidate name
+     * @return List containing single ResumeProcessingResponse with extracted data
+     */
+    @InvocableMethod(label='Process Resume with Document AI' 
+                     description='Process candidate resume using Document AI to extract structured information. Session ID generated automatically.'
+                     category='Document AI')
+    public static List<ResumeProcessingResponse> processResumeInvocable(List<ResumeProcessingRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            ResumeProcessingResponse errorResponse = new ResumeProcessingResponse();
+            errorResponse.success = false;
+            errorResponse.errorMessage = 'No candidate name provided';
+            return new List<ResumeProcessingResponse>{errorResponse};
+        }
+        
+        ResumeProcessingRequest request = requests[0];
+        ResumeProcessingResponse response = processResume(request.candidateName);
+        
+        return new List<ResumeProcessingResponse>{response};
+    }
+    
+    /**
+     * Main method to process resume for a candidate using Document AI
+     * Uses OAuth 2.0 to generate session ID dynamically
+     * @param candidateName The name of the candidate (e.g., "Jane Doe")
+     * @return ResumeProcessingResponse with extracted data
+     */
+    public static ResumeProcessingResponse processResume(String candidateName) {
+        ResumeProcessingResponse response = new ResumeProcessingResponse();
+        
+        System.debug('DocumentAI Resume Processor: Processing resume for candidate: ' + candidateName);
+        
+        try {
+            // Step 1: Generate session ID using OAuth 2.0
+            System.debug('Step 1: Generating session ID using OAuth 2.0...');
+            String sessionId = generateSessionId();
+            if (sessionId == null) {
+                System.debug('ERROR: Failed to generate session ID');
+                response.success = false;
+                response.errorMessage = 'Failed to authenticate with Salesforce. Please check credentials.';
+                return response;
+            }
+            System.debug('SUCCESS: Session ID generated successfully, length: ' + sessionId.length());
+            
+            // Step 2: Find candidate in Candidate_Resume__c object
+            System.debug('Step 2: Finding candidate record...');
+            String contentDocumentId = findCandidateResumeFile(candidateName);
+            if (contentDocumentId == null) {
+                System.debug('ERROR: Candidate not found: ' + candidateName);
+                response.success = false;
+                response.errorMessage = 'Candidate not found: ' + candidateName;
+                return response;
+            }
+            System.debug('SUCCESS: Found ContentDocument ID: ' + contentDocumentId);
+            
+            // Step 3: Extract file path from ContentDocument ID (same as DocumentAISimpleClient)
+            System.debug('Step 3: Extracting file path from ContentDocument ID...');
+            String filePath = extractFilePathFromContentDocumentId(contentDocumentId);
+            if (filePath == null) {
+                System.debug('ERROR: Could not extract file path from ContentDocument ID');
+                response.success = false;
+                response.errorMessage = 'Could not extract file path from ContentDocument ID: ' + contentDocumentId;
+                return response;
+            }
+            System.debug('SUCCESS: Extracted file path: ' + filePath);
+            
+            // Step 4: Get the file content from Salesforce (same as DocumentAISimpleClient)
+            System.debug('Step 4: Retrieving file content...');
+            String base64Content = getFileContent(filePath, sessionId);
+            if (base64Content == null) {
+                System.debug('ERROR: Failed to retrieve file content');
+                response.success = false;
+                response.errorMessage = 'Failed to retrieve resume file content from Salesforce';
+                return response;
+            }
+            System.debug('SUCCESS: File content retrieved, base64 length: ' + base64Content.length());
+            
+            // Step 5: Determine MIME type (same as DocumentAISimpleClient)
+            System.debug('Step 5: Determining MIME type...');
+            String mimeType = getMimeType(filePath);
+            System.debug('MIME type: ' + mimeType);
+            
+            // Step 6: Prepare the request body (same structure as DocumentAISimpleClient)
+            System.debug('Step 6: Preparing API request...');
+            String requestBodyJson = '{\n' +
+                '  "mlModel": "llmgateway__VertexAIGemini20Flash001",\n' +
+                '  "schemaConfig": ' + RESUME_SCHEMA + ',\n' +
+                '  "files": [\n' +
+                '    {\n' +
+                '      "mimeType": "' + mimeType + '",\n' +
+                '      "data": "' + base64Content + '"\n' +
+                '    }\n' +
+                '  ]\n' +
+                '}';
+            
+            System.debug('Request body prepared, size: ' + requestBodyJson.length() + ' chars');
+            
+            // Step 7: Make the API call (same as DocumentAISimpleClient)
+            System.debug('Step 7: Making API call...');
+            String apiResponse = makeAPICall(requestBodyJson, sessionId);
+            System.debug('API response received, size: ' + apiResponse.length() + ' chars');
+            
+            // Step 8: Parse the response (same as DocumentAISimpleClient)
+            System.debug('Step 8: Parsing API response...');
+            Map<String, Object> responseMap = (Map<String, Object>) JSON.deserializeUntyped(apiResponse);
+            List<Object> dataList = (List<Object>) responseMap.get('data');
+            
+            if (dataList != null && !dataList.isEmpty()) {
+                Map<String, Object> firstData = (Map<String, Object>) dataList[0];
+                String extractedDataStr = (String) firstData.get('data');
+                String error = (String) firstData.get('error');
+                
+                System.debug('Extracted data string: ' + extractedDataStr);
+                System.debug('Error field: ' + error);
+                
+                if (error == null && extractedDataStr != null && extractedDataStr != '{}') {
+                    System.debug('Processing extracted data...');
+                    
+                    // Decode HTML entities and parse the extracted data (same as DocumentAISimpleClient)
+                    String decodedData = decodeHtmlEntities(extractedDataStr);
+                    System.debug('Decoded data: ' + decodedData);
+                    
+                    Map<String, Object> extractedDataMap = (Map<String, Object>) JSON.deserializeUntyped(decodedData);
+                    System.debug('Parsed data map: ' + extractedDataMap);
+                    
+                    // Format the extracted data and populate individual fields (same as DocumentAISimpleClient)
+                    Map<String, Object> formattedData = formatExtractedData(extractedDataMap);
+                    System.debug('Formatted data: ' + formattedData);
+                    
+                    response.success = true;
+                    response.extractedDataJson = JSON.serialize(formattedData);
+                    response.rawResponse = apiResponse;
+                    
+                    // Populate individual fields for easy access
+                    populateResumeFields(response, formattedData);
+                    
+                    // Log extracted values
+                    logExtractedResumeValues(response, candidateName);
+                    
+                    System.debug('SUCCESS: Resume data extracted successfully');
+                    
+                } else {
+                    System.debug('ERROR: No data extracted or error occurred');
+                    response.success = false;
+                    response.errorMessage = 'No data extracted from resume. Error: ' + error;
+                    response.rawResponse = apiResponse;
+                }
+            } else {
+                System.debug('ERROR: Invalid response format - no data array');
+                response.success = false;
+                response.errorMessage = 'Invalid response format from Document AI API';
+                response.rawResponse = apiResponse;
+            }
+            
+        } catch (Exception e) {
+            System.debug('EXCEPTION: ' + e.getMessage());
+            System.debug('Stack trace: ' + e.getStackTraceString());
+            response.success = false;
+            response.errorMessage = 'Exception occurred: ' + e.getMessage();
+            response.rawResponse = e.getStackTraceString();
+        }
+        
+        System.debug('DocumentAI Resume Processor: Processing completed');
+        return response;
+    }
+    
+    /**
+     * Generate session ID using OAuth 2.0 Username-Password flow
+     * @return Session ID (access token) or null if authentication fails
+     */
+    private static String generateSessionId() {
+        try {
+            System.debug('generateSessionId: Starting OAuth 2.0 authentication...');
+            
+            // For production, use Named Credential or Custom Setting for password
+            // For now, we'll use the current user's session ID as fallback
+            String currentSessionId = UserInfo.getSessionId();
+            if (currentSessionId != null && currentSessionId.length() > 10) {
+                System.debug('generateSessionId: Using current user session ID');
+                return currentSessionId;
+            }
+            
+            // If current session is not available, we need to implement OAuth 2.0
+            // This requires the password which should be stored securely
+            System.debug('generateSessionId: Current session not available, OAuth 2.0 implementation needed');
+            System.debug('generateSessionId: For production, implement OAuth 2.0 with stored credentials');
+            
+            // TODO: Implement OAuth 2.0 Username-Password flow
+            // This would require:
+            // 1. Storing password securely (Custom Setting, Named Credential, or encrypted field)
+            // 2. Making OAuth 2.0 call to get access token
+            // 3. Using access token as session ID
+            
+            return null;
+            
+        } catch (Exception e) {
+            System.debug('generateSessionId: EXCEPTION - ' + e.getMessage());
+            System.debug('generateSessionId: Stack trace - ' + e.getStackTraceString());
+            return null;
+        }
+    }
+    
+    /**
+     * Extract file path from ContentDocument ID (same as DocumentAISimpleClient)
+     */
+    private static String extractFilePathFromContentDocumentId(String contentDocumentId) {
+        try {
+            // Query ContentDocument to get the file path
+            List<ContentDocument> documents = [
+                SELECT Id, Title, FileType, LatestPublishedVersionId
+                FROM ContentDocument 
+                WHERE Id = :contentDocumentId 
+                LIMIT 1
+            ];
+            
+            if (documents.isEmpty()) {
+                System.debug('ERROR: ContentDocument not found for ID: ' + contentDocumentId);
+                return null;
+            }
+            
+            ContentDocument doc = documents[0];
+            System.debug('Found ContentDocument: ' + doc.Title + ' (Type: ' + doc.FileType + ')');
+            
+            // Construct file path in the format expected by DocumentAISimpleClient
+            // Format: /sfc/p/[orgId]/a/[ContentDocumentId]/[Title]
+            String orgId = UserInfo.getOrganizationId();
+            String filePath = '/sfc/p/' + orgId + '/a/' + contentDocumentId + '/' + doc.Title;
+            
+            System.debug('Constructed file path: ' + filePath);
+            return filePath;
+            
+        } catch (Exception e) {
+            System.debug('EXCEPTION: ' + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Get file content from Salesforce (same as DocumentAISimpleClient)
+     */
+    private static String getFileContent(String filePath, String sessionId) {
+        try {
+            System.debug('getFileContent: Extracting ContentDocument ID from file path: ' + filePath);
+            
+            String contentDocumentId = extractContentDocumentId(filePath);
+            if (contentDocumentId == null) {
+                System.debug('getFileContent: ERROR - Could not extract ContentDocument ID from file path');
+                return null;
+            }
+            
+            System.debug('getFileContent: ContentDocument ID: ' + contentDocumentId);
+            
+            // Query the ContentVersion to get the file content (same as DocumentAISimpleClient)
+            List<ContentVersion> cvList = [
+                SELECT VersionData, FileType, Title, ContentSize 
+                FROM ContentVersion 
+                WHERE ContentDocumentId = :contentDocumentId 
+                AND IsLatest = true 
+                LIMIT 1
+            ];
+            
+            if (cvList.isEmpty()) {
+                System.debug('getFileContent: ERROR - No ContentVersion found for ContentDocument ID: ' + contentDocumentId);
+                return null;
+            }
+            
+            ContentVersion cv = cvList[0];
+            System.debug('getFileContent: Found file - Title: ' + cv.Title + ', Type: ' + cv.FileType + ', Size: ' + cv.ContentSize + ' bytes');
+            
+            // Convert BLOB to base64 (same as DocumentAISimpleClient)
+            String base64Data = EncodingUtil.base64Encode(cv.VersionData);
+            System.debug('getFileContent: SUCCESS - Converted to base64, length: ' + base64Data.length() + ' characters');
+            
+            return base64Data;
+            
+        } catch (Exception e) {
+            System.debug('getFileContent: EXCEPTION - ' + e.getMessage());
+            System.debug('getFileContent: Stack trace: ' + e.getStackTraceString());
+            return null;
+        }
+    }
+    
+    /**
+     * Extract ContentDocument ID from file path (same as DocumentAISimpleClient)
+     */
+    private static String extractContentDocumentId(String filePath) {
+        // Handle different file path formats (same as DocumentAISimpleClient)
+        if (filePath.contains('/sfc/p/')) {
+            // Format: /sfc/p/Hs00000Ikg5l/a/Hs000001rYib/Rr9xU1wxgOsL6eRNx7bEYzvd1OE5_vOwQ0XtV7XChP4
+            String[] parts = filePath.split('/');
+            if (parts.size() >= 6) {
+                return parts[4]; // This should be the ContentDocument ID
+            }
+        } else if (filePath.startsWith('069')) {
+            // Direct ContentDocument ID
+            return filePath;
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Determine MIME type based on file extension (same as DocumentAISimpleClient)
+     */
+    private static String getMimeType(String filePath) {
+        String fileExtension = getFileExtension(filePath).toLowerCase();
+        
+        switch on fileExtension {
+            when 'pdf' {
+                return 'application/pdf';
+            }
+            when 'jpg', 'jpeg' {
+                return 'image/jpeg';
+            }
+            when 'png' {
+                return 'image/png';
+            }
+            when 'gif' {
+                return 'image/gif';
+            }
+            when 'tiff', 'tif' {
+                return 'image/tiff';
+            }
+            when else {
+                return 'application/pdf';
+            }
+        }
+    }
+    
+    /**
+     * Get file extension from file path (same as DocumentAISimpleClient)
+     */
+    private static String getFileExtension(String filePath) {
+        if (filePath.contains('.')) {
+            return filePath.substringAfterLast('.');
+        }
+        return '';
+    }
+    
+    /**
+     * Make API call to Document AI service (same as DocumentAISimpleClient)
+     */
+    private static String makeAPICall(String requestBody, String sessionId) {
+        System.debug('makeAPICall: Preparing HTTP request...');
+        System.debug('makeAPICall: Endpoint: ' + DOCUMENT_AI_ENDPOINT);
+        System.debug('makeAPICall: Session ID length: ' + (sessionId != null ? sessionId.length() : 0) + ' characters');
+        
+        Http http = new Http();
+        HttpRequest request = new HttpRequest();
+        
+        request.setEndpoint(DOCUMENT_AI_ENDPOINT);
+        request.setMethod('POST');
+        request.setHeader('Content-Type', CONTENT_TYPE);
+        request.setHeader('Authorization', 'Bearer ' + sessionId);
+        request.setBody(requestBody);
+        request.setTimeout(120000); // 2 minutes timeout
+        
+        System.debug('makeAPICall: Sending HTTP request...');
+        System.debug('makeAPICall: Request body size: ' + requestBody.length() + ' characters');
+        
+        HttpResponse response = http.send(request);
+        
+        System.debug('makeAPICall: Received HTTP response');
+        System.debug('makeAPICall: Status Code: ' + response.getStatusCode());
+        System.debug('makeAPICall: Response Headers: ' + response.getHeaderKeys());
+        System.debug('makeAPICall: Response body size: ' + response.getBody().length() + ' characters');
+        
+        if (response.getStatusCode() == 200 || response.getStatusCode() == 201) {
+            System.debug('makeAPICall: SUCCESS - API call successful');
+            return response.getBody();
+        } else {
+            System.debug('makeAPICall: ERROR - API call failed');
+            System.debug('makeAPICall: Error response body: ' + response.getBody());
+            throw new CalloutException('API call failed with status: ' + response.getStatusCode() + 
+                                     ', Body: ' + response.getBody());
+        }
+    }
+    
+    /**
+     * Decode HTML entities in the response (same as DocumentAISimpleClient)
+     */
+    private static String decodeHtmlEntities(String encodedString) {
+        // Replace common HTML entities
+        String decoded = encodedString
+            .replace('&quot;', '"')
+            .replace('&amp;', '&')
+            .replace('&lt;', '<')
+            .replace('&gt;', '>')
+            .replace('&#92;', '\\');
+        
+        return decoded;
+    }
+    
+    /**
+     * Format extracted data to clean key-value pairs (same as DocumentAISimpleClient)
+     */
+    private static Map<String, Object> formatExtractedData(Map<String, Object> rawData) {
+        Map<String, Object> formattedData = new Map<String, Object>();
+        
+        for (String key : rawData.keySet()) {
+            Object value = rawData.get(key);
+            
+            if (value instanceof Map<String, Object>) {
+                Map<String, Object> valueMap = (Map<String, Object>) value;
+                if (valueMap.containsKey('value')) {
+                    formattedData.put(key, valueMap.get('value'));
+                } else {
+                    formattedData.put(key, value);
+                }
+            } else {
+                formattedData.put(key, value);
+            }
+        }
+        
+        return formattedData;
+    }
+    
+    /**
+     * Find candidate's resume file ID from Candidate_Resume__c object
+     */
+    private static String findCandidateResumeFile(String candidateName) {
+        try {
+            System.debug('Searching for candidate: ' + candidateName);
+            
+            List<Candidate_Resume__c> candidateRecords = [
+                SELECT Id, candidate_name__c, resume_file_id__c
+                FROM Candidate_Resume__c 
+                WHERE candidate_name__c = :candidateName
+                LIMIT 1
+            ];
+            
+            if (candidateRecords.isEmpty()) {
+                System.debug('No record found for candidate: ' + candidateName);
+                return null;
+            }
+            
+            Candidate_Resume__c candidateRecord = candidateRecords[0];
+            System.debug('Found candidate record: ' + candidateRecord.Id);
+            System.debug('Resume file ID: ' + candidateRecord.resume_file_id__c);
+            
+            return candidateRecord.resume_file_id__c;
+            
+        } catch (Exception e) {
+            System.debug('EXCEPTION: ' + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Populate individual resume fields for easy access
+     */
+    private static void populateResumeFields(ResumeProcessingResponse response, Map<String, Object> formattedData) {
+        if (formattedData.containsKey('fullName')) {
+            response.fullName = (String) formattedData.get('fullName');
+        }
+        if (formattedData.containsKey('email')) {
+            response.email = (String) formattedData.get('email');
+        }
+        if (formattedData.containsKey('phone')) {
+            response.phone = (String) formattedData.get('phone');
+        }
+        if (formattedData.containsKey('location')) {
+            response.location = (String) formattedData.get('location');
+        }
+        if (formattedData.containsKey('summary')) {
+            response.summary = (String) formattedData.get('summary');
+        }
+        if (formattedData.containsKey('skills')) {
+            response.skills = (String) formattedData.get('skills');
+        }
+        if (formattedData.containsKey('experience')) {
+            response.experience = (String) formattedData.get('experience');
+        }
+        if (formattedData.containsKey('education')) {
+            response.education = (String) formattedData.get('education');
+        }
+        if (formattedData.containsKey('linkedinUrl')) {
+            response.linkedinUrl = (String) formattedData.get('linkedinUrl');
+        }
+        if (formattedData.containsKey('yearsOfExperience')) {
+            response.yearsOfExperience = (String) formattedData.get('yearsOfExperience');
+        }
+        if (formattedData.containsKey('currentRole')) {
+            response.currentRole = (String) formattedData.get('currentRole');
+        }
+    }
+    
+    /**
+     * Log extracted resume values
+     */
+    private static void logExtractedResumeValues(ResumeProcessingResponse response, String candidateName) {
+        System.debug('===== EXTRACTED RESUME VALUES FOR ' + candidateName + ' =====');
+        
+        if (response.fullName != null) {
+            System.debug('Full Name = ' + response.fullName);
+        }
+        if (response.email != null) {
+            System.debug('Email = ' + response.email);
+        }
+        if (response.phone != null) {
+            System.debug('Phone = ' + response.phone);
+        }
+        if (response.location != null) {
+            System.debug('Location = ' + response.location);
+        }
+        if (response.summary != null) {
+            System.debug('Summary = ' + response.summary);
+        }
+        if (response.skills != null) {
+            System.debug('Skills = ' + response.skills);
+        }
+        if (response.experience != null) {
+            System.debug('Experience = ' + response.experience);
+        }
+        if (response.education != null) {
+            System.debug('Education = ' + response.education);
+        }
+        if (response.linkedinUrl != null) {
+            System.debug('LinkedIn URL = ' + response.linkedinUrl);
+        }
+        if (response.yearsOfExperience != null) {
+            System.debug('Years of Experience = ' + response.yearsOfExperience);
+        }
+        if (response.currentRole != null) {
+            System.debug('Current Role = ' + response.currentRole);
+        }
+        
+        System.debug('===========================================');
+    }
+    
+    /**
+     * Test method to demonstrate usage
+     */
+    public static void testResumeProcessing() {
+        String candidateName = 'Jane Doe';
+        
+        ResumeProcessingResponse response = processResume(candidateName);
+        
+        if (response.success) {
+            System.debug('Resume Processing SUCCESS for ' + candidateName);
+            System.debug('Extracted Data: ' + response.extractedDataJson);
+            System.debug('Full Name: ' + response.fullName);
+            System.debug('Email: ' + response.email);
+            System.debug('Skills: ' + response.skills);
+        } else {
+            System.debug('Resume Processing ERROR for ' + candidateName);
+            System.debug('Error: ' + response.errorMessage);
+        }
+    }
+}

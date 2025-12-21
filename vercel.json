@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/oauth/callback",
+      "dest": "/api/auth.py"
+    },
+    {
+      "src": "/api/generate-schema",
+      "dest": "/api/generate-schema.py"
+    },
+    {
+      "src": "/api/process-document",
+      "dest": "/api/process-document.py"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/frontend/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.9"
+  }
+}

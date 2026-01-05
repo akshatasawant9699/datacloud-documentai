@@ -545,7 +545,6 @@ async function handleProcessDocument() {
         if (response.ok && data.success) {
             extractedData = data.data;
             console.log('Extracted Data:', extractedData);
-            console.log('Type:', typeof extractedData);
             
             const resultContainer = document.getElementById('resultContainer');
             if (resultContainer) {
@@ -557,107 +556,197 @@ async function handleProcessDocument() {
                 
                 // Handle common wrapper structures
                 if (displayData && typeof displayData === 'object') {
-                    // If it's an array with one element, use that element
                     if (Array.isArray(displayData) && displayData.length === 1) {
                         displayData = displayData[0];
                     }
-                    // If it has a 'documents' array, use the first document
                     if (displayData.documents && Array.isArray(displayData.documents) && displayData.documents.length > 0) {
                         displayData = displayData.documents[0];
                     }
-                    // If it has a 'data' property that's an object, use that
                     if (displayData.data && typeof displayData.data === 'object' && !Array.isArray(displayData.data)) {
                         displayData = displayData.data;
                     }
                 }
                 
-                console.log('Display Data:', displayData);
+                // Helper function: Extract value from {type, value} structure
+                function extractValue(val) {
+                    if (val && typeof val === 'object' && !Array.isArray(val)) {
+                        // Check if it has 'value' property (Salesforce Document AI format)
+                        if ('value' in val) {
+                            return val.value;
+                        }
+                    }
+                    return val;
+                }
                 
-                // Create table
-                const table = document.createElement('table');
-                table.className = 'results-table';
+                // Helper function: Check if array contains objects with {type, value} structure
+                function isItemsArray(arr) {
+                    if (!Array.isArray(arr) || arr.length === 0) return false;
+                    // Check if first item is an object with nested {type, value} properties
+                    const firstItem = arr[0];
+                    if (typeof firstItem !== 'object') return false;
+                    const keys = Object.keys(firstItem);
+                    if (keys.length === 0) return false;
+                    // Check if any property has {type, value} structure
+                    return keys.some(k => firstItem[k] && typeof firstItem[k] === 'object' && 'value' in firstItem[k]);
+                }
                 
-                // Create header
-                const thead = document.createElement('thead');
-                const headerRow = document.createElement('tr');
-                const thKey = document.createElement('th');
-                thKey.textContent = 'Key';
-                const thValue = document.createElement('th');
-                thValue.textContent = 'Value';
-                headerRow.appendChild(thKey);
-                headerRow.appendChild(thValue);
-                thead.appendChild(headerRow);
-                table.appendChild(thead);
-                
-                // Create body
-                const tbody = document.createElement('tbody');
-                
-                // Function to add a row to the table
-                function addRow(key, value) {
-                    const row = document.createElement('tr');
-                    const tdKey = document.createElement('td');
-                    const tdValue = document.createElement('td');
+                // Helper function: Create a simple key-value table
+                function createKeyValueTable(data, title) {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.marginBottom = '20px';
                     
-                    tdKey.textContent = key;
-                    tdKey.style.fontWeight = '500';
+                    if (title) {
+                        const h4 = document.createElement('h4');
+                        h4.textContent = title;
+                        h4.style.marginBottom = '10px';
+                        h4.style.color = '#333';
+                        wrapper.appendChild(h4);
+                    }
                     
-                    if (value === null || value === undefined) {
-                        tdValue.textContent = '-';
-                        tdValue.style.color = '#999';
-                    } else if (typeof value === 'object') {
-                        if (Array.isArray(value)) {
-                            if (value.length === 0) {
-                                tdValue.textContent = '[]';
-                            } else if (typeof value[0] === 'object') {
-                                tdValue.textContent = JSON.stringify(value, null, 2);
-                                tdValue.style.whiteSpace = 'pre-wrap';
-                                tdValue.style.fontFamily = 'monospace';
-                                tdValue.style.fontSize = '12px';
-                            } else {
-                                tdValue.textContent = value.join(', ');
-                            }
-                        } else {
+                    const table = document.createElement('table');
+                    table.className = 'results-table';
+                    
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    const thKey = document.createElement('th');
+                    thKey.textContent = 'Field';
+                    const thValue = document.createElement('th');
+                    thValue.textContent = 'Value';
+                    headerRow.appendChild(thKey);
+                    headerRow.appendChild(thValue);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    const tbody = document.createElement('tbody');
+                    
+                    for (const [key, rawValue] of Object.entries(data)) {
+                        const value = extractValue(rawValue);
+                        
+                        // Skip arrays - they'll be handled separately
+                        if (Array.isArray(rawValue) && isItemsArray(rawValue)) {
+                            continue;
+                        }
+                        
+                        const row = document.createElement('tr');
+                        const tdKey = document.createElement('td');
+                        const tdValue = document.createElement('td');
+                        
+                        tdKey.textContent = key;
+                        tdKey.style.fontWeight = '500';
+                        
+                        if (value === null || value === undefined) {
+                            tdValue.textContent = '-';
+                            tdValue.style.color = '#999';
+                        } else if (Array.isArray(value)) {
+                            tdValue.textContent = value.join(', ');
+                        } else if (typeof value === 'object') {
                             tdValue.textContent = JSON.stringify(value, null, 2);
                             tdValue.style.whiteSpace = 'pre-wrap';
                             tdValue.style.fontFamily = 'monospace';
                             tdValue.style.fontSize = '12px';
+                        } else {
+                            tdValue.textContent = String(value);
                         }
-                    } else {
-                        tdValue.textContent = String(value);
+                        
+                        row.appendChild(tdKey);
+                        row.appendChild(tdValue);
+                        tbody.appendChild(row);
                     }
                     
-                    row.appendChild(tdKey);
-                    row.appendChild(tdValue);
-                    tbody.appendChild(row);
+                    table.appendChild(tbody);
+                    wrapper.appendChild(table);
+                    return wrapper;
+                }
+                
+                // Helper function: Create items table (for line items)
+                function createItemsTable(items, title) {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.marginTop = '20px';
+                    
+                    const h4 = document.createElement('h4');
+                    h4.textContent = title || 'Items';
+                    h4.style.marginBottom = '10px';
+                    h4.style.color = '#333';
+                    wrapper.appendChild(h4);
+                    
+                    const table = document.createElement('table');
+                    table.className = 'results-table';
+                    
+                    // Get all unique keys from items
+                    const allKeys = new Set();
+                    items.forEach(item => {
+                        Object.keys(item).forEach(k => allKeys.add(k));
+                    });
+                    const columns = Array.from(allKeys);
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    columns.forEach(col => {
+                        const th = document.createElement('th');
+                        th.textContent = col;
+                        headerRow.appendChild(th);
+                    });
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        columns.forEach(col => {
+                            const td = document.createElement('td');
+                            const rawValue = item[col];
+                            const value = extractValue(rawValue);
+                            
+                            if (value === null || value === undefined) {
+                                td.textContent = '-';
+                                td.style.color = '#999';
+                            } else {
+                                td.textContent = String(value);
+                            }
+                            row.appendChild(td);
+                        });
+                        tbody.appendChild(row);
+                    });
+                    
+                    table.appendChild(tbody);
+                    wrapper.appendChild(table);
+                    return wrapper;
                 }
                 
                 // Process the data
                 if (displayData && typeof displayData === 'object' && !Array.isArray(displayData)) {
                     const keys = Object.keys(displayData);
-                    console.log('Keys found:', keys.length, keys);
                     
                     if (keys.length === 0) {
                         resultContainer.innerHTML = '<p style="color: #666; text-align: center;">No data extracted from document.</p>';
                     } else {
+                        // Create main table for simple fields
+                        const mainTable = createKeyValueTable(displayData, null);
+                        resultContainer.appendChild(mainTable);
+                        
+                        // Create separate tables for arrays (Items, etc.)
                         for (const key of keys) {
-                            addRow(key, displayData[key]);
+                            const rawValue = displayData[key];
+                            if (Array.isArray(rawValue) && isItemsArray(rawValue)) {
+                                const itemsTable = createItemsTable(rawValue, key);
+                                resultContainer.appendChild(itemsTable);
+                            }
                         }
-                        table.appendChild(tbody);
-                        resultContainer.appendChild(table);
                     }
                 } else if (Array.isArray(displayData)) {
-                    // Handle array of objects
-                    displayData.forEach((item, index) => {
-                        if (typeof item === 'object') {
-                            for (const [key, value] of Object.entries(item)) {
-                                addRow(key, value);
-                            }
-                        } else {
-                            addRow(`Item ${index + 1}`, item);
-                        }
-                    });
-                    table.appendChild(tbody);
-                    resultContainer.appendChild(table);
+                    if (isItemsArray(displayData)) {
+                        const itemsTable = createItemsTable(displayData, 'Items');
+                        resultContainer.appendChild(itemsTable);
+                    } else {
+                        // Simple array
+                        const pre = document.createElement('pre');
+                        pre.textContent = JSON.stringify(displayData, null, 2);
+                        pre.style.margin = '0';
+                        pre.style.whiteSpace = 'pre-wrap';
+                        resultContainer.appendChild(pre);
+                    }
                 } else {
                     // Fallback: show as JSON
                     const pre = document.createElement('pre');

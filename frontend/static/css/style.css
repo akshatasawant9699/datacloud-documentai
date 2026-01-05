@@ -344,12 +344,35 @@ header h1 {
     overflow: auto;
 }
 
-.result-container pre {
-    margin: 0;
-    font-family: 'Courier New', monospace;
-    font-size: 12px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+.results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: white;
+}
+
+.results-table th,
+.results-table td {
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+    vertical-align: top;
+}
+
+.results-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+    position: sticky;
+    top: 0;
+}
+
+.results-table tr:nth-child(even) {
+    background-color: #fcfcfc;
+}
+
+.results-table tr:hover {
+    background-color: #f0f0f0;
 }
 
 footer {
@@ -379,5 +402,10 @@ footer {
     .step-header h2 {
         font-size: 20px;
     }
+    
+    .results-table th, 
+    .results-table td {
+        padding: 8px;
+        font-size: 14px;
+    }
 }
-

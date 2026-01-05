@@ -461,7 +461,7 @@ async function handleProcessDocument() {
     const errorDiv = document.getElementById('processError');
     const resultSection = document.getElementById('resultSection');
     const processingStatus = document.getElementById('processingStatus');
-    const resultContent = document.getElementById('resultContent');
+    const resultContent = document.getElementById('resultContent'); // Kept for reference but not used in table mode
     
     if (errorDiv) errorDiv.style.display = 'none';
     if (resultSection) resultSection.style.display = 'none';
@@ -544,11 +544,132 @@ async function handleProcessDocument() {
         
         if (response.ok && data.success) {
             extractedData = data.data;
-            if (resultContent) {
-            resultContent.textContent = JSON.stringify(extractedData, null, 2);
+            console.log('Extracted Data:', extractedData);
+            console.log('Type:', typeof extractedData);
+            
+            const resultContainer = document.getElementById('resultContainer');
+            if (resultContainer) {
+                // Clear previous content
+                resultContainer.innerHTML = '';
+                
+                // Unwrap nested data structures
+                let displayData = extractedData;
+                
+                // Handle common wrapper structures
+                if (displayData && typeof displayData === 'object') {
+                    // If it's an array with one element, use that element
+                    if (Array.isArray(displayData) && displayData.length === 1) {
+                        displayData = displayData[0];
+                    }
+                    // If it has a 'documents' array, use the first document
+                    if (displayData.documents && Array.isArray(displayData.documents) && displayData.documents.length > 0) {
+                        displayData = displayData.documents[0];
+                    }
+                    // If it has a 'data' property that's an object, use that
+                    if (displayData.data && typeof displayData.data === 'object' && !Array.isArray(displayData.data)) {
+                        displayData = displayData.data;
+                    }
+                }
+                
+                console.log('Display Data:', displayData);
+                
+                // Create table
+                const table = document.createElement('table');
+                table.className = 'results-table';
+                
+                // Create header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+                const thKey = document.createElement('th');
+                thKey.textContent = 'Key';
+                const thValue = document.createElement('th');
+                thValue.textContent = 'Value';
+                headerRow.appendChild(thKey);
+                headerRow.appendChild(thValue);
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+                
+                // Create body
+                const tbody = document.createElement('tbody');
+                
+                // Function to add a row to the table
+                function addRow(key, value) {
+                    const row = document.createElement('tr');
+                    const tdKey = document.createElement('td');
+                    const tdValue = document.createElement('td');
+                    
+                    tdKey.textContent = key;
+                    tdKey.style.fontWeight = '500';
+                    
+                    if (value === null || value === undefined) {
+                        tdValue.textContent = '-';
+                        tdValue.style.color = '#999';
+                    } else if (typeof value === 'object') {
+                        if (Array.isArray(value)) {
+                            if (value.length === 0) {
+                                tdValue.textContent = '[]';
+                            } else if (typeof value[0] === 'object') {
+                                tdValue.textContent = JSON.stringify(value, null, 2);
+                                tdValue.style.whiteSpace = 'pre-wrap';
+                                tdValue.style.fontFamily = 'monospace';
+                                tdValue.style.fontSize = '12px';
+                            } else {
+                                tdValue.textContent = value.join(', ');
+                            }
+                        } else {
+                            tdValue.textContent = JSON.stringify(value, null, 2);
+                            tdValue.style.whiteSpace = 'pre-wrap';
+                            tdValue.style.fontFamily = 'monospace';
+                            tdValue.style.fontSize = '12px';
+                        }
+                    } else {
+                        tdValue.textContent = String(value);
+                    }
+                    
+                    row.appendChild(tdKey);
+                    row.appendChild(tdValue);
+                    tbody.appendChild(row);
+                }
+                
+                // Process the data
+                if (displayData && typeof displayData === 'object' && !Array.isArray(displayData)) {
+                    const keys = Object.keys(displayData);
+                    console.log('Keys found:', keys.length, keys);
+                    
+                    if (keys.length === 0) {
+                        resultContainer.innerHTML = '<p style="color: #666; text-align: center;">No data extracted from document.</p>';
+                    } else {
+                        for (const key of keys) {
+                            addRow(key, displayData[key]);
+                        }
+                        table.appendChild(tbody);
+                        resultContainer.appendChild(table);
+                    }
+                } else if (Array.isArray(displayData)) {
+                    // Handle array of objects
+                    displayData.forEach((item, index) => {
+                        if (typeof item === 'object') {
+                            for (const [key, value] of Object.entries(item)) {
+                                addRow(key, value);
+                            }
+                        } else {
+                            addRow(`Item ${index + 1}`, item);
+                        }
+                    });
+                    table.appendChild(tbody);
+                    resultContainer.appendChild(table);
+                } else {
+                    // Fallback: show as JSON
+                    const pre = document.createElement('pre');
+                    pre.textContent = JSON.stringify(displayData, null, 2);
+                    pre.style.margin = '0';
+                    pre.style.whiteSpace = 'pre-wrap';
+                    resultContainer.appendChild(pre);
+                }
             }
+            
             if (resultSection) {
-            resultSection.style.display = 'block';
+                resultSection.style.display = 'block';
             }
         } else {
             showError('processError', data.error || 'Failed to process document');

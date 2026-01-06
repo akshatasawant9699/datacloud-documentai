@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <description>Flow to process a resume document using Document AI and enrich a Contact record.</description>
+    <label>Document AI Flow for Resume</label>
+    <processType>Flow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Contact_Record</targetReference>
+        </connector>
+    </start>
+    <recordLookups>
+        <name>Get_Contact_Record</name>
+        <label>Get Contact Record</label>
+        <locationX>50</locationX>
+        <locationY>50</locationY>
+        <connector>
+            <targetReference>Document_AI_Extract_Action</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Contact</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <actionCalls>
+        <name>Document_AI_Extract_Action</name>
+        <label>Document AI Extract Action</label>
+        <locationX>50</locationX>
+        <locationY>150</locationY>
+        <actionName>DocumentProcessor.processDocument</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Enrich_Contact_Action</targetReference>
+        </connector>
+        <inputParameters>
+            <name>documentContent</name>
+            <value>
+                <stringValue>Dummy Document Content</stringValue>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>schema</name>
+            <value>
+                <stringValue>{"fields": ["Name", "Email", "Phone", "Experience", "Skills"]}</stringValue>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <name>output</name>
+            <value>
+                <elementReference>extractedResumeData</elementReference>
+            </value>
+        </outputParameters>
+    </actionCalls>
+    <actionCalls>
+        <name>Enrich_Contact_Action</name>
+        <label>Enrich Contact Action</label>
+        <locationX>50</locationX>
+        <locationY>250</locationY>
+        <actionName>ContactEnrichmentHandler.enrichContactFromDocument</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Display_Results</targetReference>
+        </connector>
+        <inputParameters>
+            <name>contactId</name>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>extractedDataJson</name>
+            <value>
+                <elementReference>extractedResumeData</elementReference>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <name>output</name>
+            <value>
+                <elementReference>enrichmentResult</elementReference>
+            </value>
+        </outputParameters>
+    </actionCalls>
+    <screens>
+        <name>Display_Results</name>
+        <label>Document AI Results</label>
+        <locationX>50</locationX>
+        <locationY>350</locationY>
+        <fields>
+            <name>Extracted_Data_Display</name>
+            <fieldText>Extracted Resume Data: {!extractedResumeData}</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Enrichment_Result_Display</name>
+            <fieldText>Contact Enrichment Result: {!enrichmentResult}</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>extractedResumeData</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+    <variables>
+        <name>enrichmentResult</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>true</isOutput>
+    </variables>
+</Flow>

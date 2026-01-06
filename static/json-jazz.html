@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Jazz - Schema Generator</title>
+    <style>
+        :root {
+            --primary: #6200ee;
+            --primary-dark: #3700b3;
+            --primary-light: #bb86fc;
+            --secondary: #03dac6;
+            --secondary-dark: #018786;
+            --error: #b00020;
+            --background: #ffffff;
+            --surface: #f5f5f5;
+            --on-primary: #ffffff;
+            --on-secondary: #000000;
+            --on-background: #000000;
+            --on-surface: #000000;
+            --on-error: #ffffff;
+            --border-radius: 4px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--on-background);
+            background-color: var(--background);
+            padding: var(--spacing-md);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-md);
+            background-color: var(--primary);
+            color: var(--on-primary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 900px) {
+            .container {
+                flex-direction: row;
+            }
+            
+            .editor-container, .schema-container {
+                flex: 1;
+            }
+        }
+
+        .editor-container, .schema-container {
+            padding: var(--spacing-md);
+            background-color: var(--surface);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: var(--spacing-xs);
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: var(--on-primary);
+            border: none;
+            padding: var(--spacing-xs) var(--spacing-md);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        button.secondary {
+            background-color: var(--secondary);
+            color: var(--on-secondary);
+        }
+
+        button.secondary:hover {
+            background-color: var(--secondary-dark);
+        }
+
+        button.danger {
+            background-color: var(--error);
+            color: var(--on-error);
+        }
+
+        .fields-container {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .field-item {
+            background-color: var(--background);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .field-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .field-title {
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .drag-handle {
+            cursor: move;
+            opacity: 0.5;
+            padding: 0 var(--spacing-xs);
+        }
+
+        .drag-handle:hover {
+            opacity: 1;
+        }
+
+        .field-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
+
+        .field-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-md);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            padding: var(--spacing-sm);
+            border: 1px solid #ccc;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .checkbox-group input {
+            margin: 0;
+        }
+
+        .nested-fields {
+            margin-top: var(--spacing-md);
+            padding-left: var(--spacing-md);
+            border-left: 2px solid var(--primary-light);
+        }
+
+        .schema-display {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre;
+        }
+
+        .schema-input {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: var(--spacing-md);
+            font-family: 'Courier New', Courier, monospace;
+            padding: var(--spacing-md);
+        }
+
+        .notification {
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .notification.error {
+            background-color: var(--error);
+            color: var(--on-error);
+            display: block;
+        }
+
+        .notification.success {
+            background-color: var(--secondary);
+            color: var(--on-secondary);
+            display: block;
+        }
+
+        .dragging {
+            opacity: 0.5;
+        }
+
+        .drop-indicator {
+            height: 2px;
+            background-color: var(--primary);
+            margin: 8px 0;
+            display: none;
+        }
+
+        .field-badge {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background-color: #eee;
+            white-space: nowrap;
+        }
+
+        .field-badge.string { background-color: #a8d5ba; color: #2d5f41; }
+        .field-badge.number { background-color: #a8c0d5; color: #2d4a5f; }
+        .field-badge.boolean { background-color: #d5c7a8; color: #5f502d; }
+        .field-badge.object { background-color: #d5a8ce; color: #5f2d56; }
+        .field-badge.array { background-color: #cba8d5; color: #462d5f; }
+
+        .copy-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: var(--on-primary);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            display: none;
+            animation: fade-in-out 2s ease-in-out;
+        }
+
+        @keyframes fade-in-out {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>JSON Jazz</h1>
+        <p class="subtitle">Interactive JSON Schema Generator</p>
+    </header>
+
+    <div class="container">
+        <div class="editor-container">
+            <div class="section-title">
+                <h2>Field Editor</h2>
+                <div class="button-group">
+                    <button id="add-field">Add Field</button>
+                    <button id="clear-fields" class="danger">Clear All</button>
+                </div>
+            </div>
+            <div id="notification-editor" class="notification"></div>
+            <div id="fields-container" class="fields-container"></div>
+        </div>
+
+        <div class="schema-container">
+            <div class="section-title">
+                <h2>JSON Schema</h2>
+                <div class="button-group">
+                    <button id="copy-schema">Copy</button>
+                    <button id="copy-escaped" class="secondary">Copy Escaped</button>
+                    <button id="copy-api" class="secondary">Copy API-Ready</button>
+                    <button id="download-schema" class="secondary">Download</button>
+                    <button id="parse-schema">Parse Schema</button>
+                    <button id="clear-schema" class="danger">Clear</button>
+                </div>
+            </div>
+            <div id="notification-schema" class="notification"></div>
+            <textarea id="schema-input" class="schema-input" placeholder="Paste JSON Schema here to parse it..."></textarea>
+            <pre id="schema-display" class="schema-display">// Your schema will appear here</pre>
+        </div>
+    </div>
+
+    <div id="copy-notification" class="copy-notification">Copied to clipboard!</div>
+
+    <script>
+        // Make sure the DOM is fully loaded before running our code
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded, initializing application...");
+            // DOM Elements
+            const fieldsContainer = document.getElementById('fields-container');
+            const schemaDisplay = document.getElementById('schema-display');
+            const schemaInput = document.getElementById('schema-input');
+            const addFieldBtn = document.getElementById('add-field');
+            const clearFieldsBtn = document.getElementById('clear-fields');
+            const copySchemaBtn = document.getElementById('copy-schema');
+            const copyEscapedBtn = document.getElementById('copy-escaped');
+            const copyApiBtn = document.getElementById('copy-api');
+            const downloadSchemaBtn = document.getElementById('download-schema');
+            const parseSchemaBtn = document.getElementById('parse-schema');
+            const clearSchemaBtn = document.getElementById('clear-schema');
+            const notificationEditor = document.getElementById('notification-editor');
+            const notificationSchema = document.getElementById('notification-schema');
+            const copyNotification = document.getElementById('copy-notification');
+
+            // Field counter for unique IDs
+            let fieldCounter = 0;
+
+            // Drag and drop state
+            let draggedItem = null;
+            let dropTarget = null;
+
+            // Helper functions
+            function showNotification(element, message, type) {
+                element.textContent = message;
+                element.className = `notification ${type}`;
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    element.textContent = '';
+                    element.className = 'notification';
+                }, 5000);
+            }
+
+            function showCopyNotification(message = 'Copied to clipboard!') {
+                copyNotification.textContent = message;
+                copyNotification.style.display = 'block';
+                
+                setTimeout(() => {
+                    copyNotification.style.display = 'none';
+                }, 2000);
+            }
+
+            function syntaxHighlight(json) {
+                if (!json) return '';
+                
+                json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                
+                return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                    let cls = 'number';
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            cls = 'key';
+                            match = '<span style="color: #f92672">' + match + '</span>';
+                        } else {
+                            cls = 'string';
+                            match = '<span style="color: #a6e22e">' + match + '</span>';
+                        }
+                    } else if (/true|false/.test(match)) {
+                        cls = 'boolean';
+                        match = '<span style="color: #66d9ef">' + match + '</span>';
+                    } else if (/null/.test(match)) {
+                        cls = 'null';
+                        match = '<span style="color: #fd971f">' + match + '</span>';
+                    } else {
+                        match = '<span style="color: #ae81ff">' + match + '</span>';
+                    }
+                    return match;
+                });
+            }
+
+            function generateSchema() {
+                const fields = document.querySelectorAll('.field-item[data-level="0"]');
+                
+                if (fields.length === 0) {
+                    return '// Add fields to generate schema';
+                }
+
+                const schema = {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "type": "object",
+                    "properties": {}
+                };
+
+                const processField = (field) => {
+                    const nameInput = field.querySelector('.field-name');
+                    const typeSelect = field.querySelector('.field-type');
+                    const descriptionInput = field.querySelector('.field-description');
+                    const isArrayCheckbox = field.querySelector('.field-is-array');
+                    
+                    if (!nameInput || !nameInput.value.trim() || !typeSelect) {
+                        return null;
+                    }
+
+                    const name = nameInput.value.trim();
+                    const type = typeSelect.value;
+                    const description = descriptionInput ? descriptionInput.value.trim() : '';
+                    const isArray = isArrayCheckbox ? isArrayCheckbox.checked : false;
+
+                    let fieldSchema = {
+                        type: type
+                    };
+
+                    if (description) {
+                        fieldSchema.description = description;
+                    }
+
+                    if (type === 'object') {
+                        const nestedFields = field.querySelectorAll('.nested-fields > .field-item');
+                        if (nestedFields.length > 0) {
+                            fieldSchema.properties = {};
+                            nestedFields.forEach(nestedField => {
+                                const nestedResult = processField(nestedField);
+                                if (nestedResult) {
+                                    fieldSchema.properties[nestedResult.name] = nestedResult.schema;
+                                }
+                            });
+                        } else {
+                            fieldSchema.properties = {};
+                        }
+                    }
+
+                    if (isArray) {
+                        fieldSchema = {
+                            type: 'array',
+                            items: fieldSchema
+                        };
+                        if (description) {
+                            fieldSchema.description = description;
+                        }
+                    }
+
+                    return { name, schema: fieldSchema };
+                };
+
+                fields.forEach(field => {
+                    const result = processField(field);
+                    if (result) {
+                        schema.properties[result.name] = result.schema;
+                    }
+                });
+
+                return JSON.stringify(schema, null, 2);
+            }
+
+            function updateSchemaDisplay() {
+                const schema = generateSchema();
+                schemaDisplay.innerHTML = syntaxHighlight(schema);
+            }
+
+            function createFieldItem(type = 'string', name = '', description = '', isArray = false, level = 0, parentId = null) {
+                const fieldId = `field-${fieldCounter++}`;
+                const fieldItem = document.createElement('div');
+                fieldItem.className = 'field-item';
+                fieldItem.id = fieldId;
+                fieldItem.dataset.level = level;
+                if (parentId) {
+                    fieldItem.dataset.parentId = parentId;
+                }
+
+                fieldItem.innerHTML = `
+                    <div class="field-header">
+                        <div class="field-title">
+                            <span class="drag-handle">☰</span>
+                            <span>Field</span>
+                            <span class="field-badge ${type}${isArray ? ' array' : ''}">${isArray ? 'array[' + type + ']' : type}</span>
+                        </div>
+                        <div class="field-actions">
+                            ${type === 'object' ? `<button class="add-nested-field" data-parent="${fieldId}">Add Nested</button>` : ''}
+                            <button class="remove-field">Remove</button>
+                        </div>
+                    </div>
+                    <div class="field-form">
+                        <div class="form-group">
+                            <label for="${fieldId}-name">Name <span class="tooltip">*<span class="tooltip-text">Required. The property key in JSON.</span></span></label>
+                            <input type="text" id="${fieldId}-name" class="field-name" value="${name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="${fieldId}-type">Type <span class="tooltip">*<span class="tooltip-text">Required. The data type of this field.</span></span></label>
+                            <select id="${fieldId}-type" class="field-type">
+                                <option value="string" ${type === 'string' ? 'selected' : ''}>String</option>
+                                <option value="number" ${type === 'number' ? 'selected' : ''}>Number</option>
+                                <option value="boolean" ${type === 'boolean' ? 'selected' : ''}>Boolean</option>
+                                <option value="object" ${type === 'object' ? 'selected' : ''}>Object</option>
+                            </select>
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="${fieldId}-description">Description</label>
+                            <textarea id="${fieldId}-description" class="field-description" rows="2">${description}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="${fieldId}-is-array" class="field-is-array" ${isArray ? 'checked' : ''}>
+                                <label for="${fieldId}-is-array">Is Array</label>
+                            </div>
+                        </div>
+                    </div>
+                    ${type === 'object' ? '<div class="nested-fields"></div>' : ''}
+                `;
+
+                // Add event listeners
+                fieldItem.querySelector('.field-name').addEventListener('input', updateSchemaDisplay);
+                fieldItem.querySelector('.field-type').addEventListener('change', function() {
+                    const isObject = this.value === 'object';
+                    let nestedFieldsContainer = fieldItem.querySelector('.nested-fields');
+                    
+                    if (isObject) {
+                        if (!nestedFieldsContainer) {
+                            nestedFieldsContainer = document.createElement('div');
+                            nestedFieldsContainer.className = 'nested-fields';
+                            fieldItem.appendChild(nestedFieldsContainer);
+                        }
+                        
+                        let addNestedBtn = fieldItem.querySelector('.add-nested-field');
+                        if (!addNestedBtn) {
+                            const actions = fieldItem.querySelector('.field-actions');
+                            addNestedBtn = document.createElement('button');
+                            addNestedBtn.className = 'add-nested-field';
+                            addNestedBtn.dataset.parent = fieldId;
+                            addNestedBtn.textContent = 'Add Nested';
+                            actions.insertBefore(addNestedBtn, actions.firstChild);
+                            
+                            addNestedBtn.addEventListener('click', function() {
+                                const parentId = this.dataset.parent;
+                                const parentLevel = parseInt(document.getElementById(parentId).dataset.level);
+                                const nestedFieldsContainer = document.getElementById(parentId).querySelector('.nested-fields');
+                                
+                                const nestedField = createFieldItem('string', '', '', false, parentLevel + 1, parentId);
+                                nestedFieldsContainer.appendChild(nestedField);
+                                updateSchemaDisplay();
+                            });
+                        }
+                    } else {
+                        if (nestedFieldsContainer) {
+                            nestedFieldsContainer.remove();
+                        }
+                        
+                        const addNestedBtn = fieldItem.querySelector('.add-nested-field');
+                        if (addNestedBtn) {
+                            addNestedBtn.remove();
+                        }
+                    }
+                    
+                    // Update the field badge
+                    const fieldBadge = fieldItem.querySelector('.field-badge');
+                    const isArray = fieldItem.querySelector('.field-is-array').checked;
+                    fieldBadge.className = `field-badge ${this.value}${isArray ? ' array' : ''}`;
+                    fieldBadge.textContent = isArray ? `array[${this.value}]` : this.value;
+                    
+                    updateSchemaDisplay();
+                });
+                
+                const descriptionField = fieldItem.querySelector('.field-description');
+                if (descriptionField) {
+                    descriptionField.addEventListener('input', updateSchemaDisplay);
+                }
+                
+                const isArrayCheckbox = fieldItem.querySelector('.field-is-array');
+                if (isArrayCheckbox) {
+                    isArrayCheckbox.addEventListener('change', function() {
+                        // Update the field badge
+                        const fieldBadge = fieldItem.querySelector('.field-badge');
+                        const type = fieldItem.querySelector('.field-type').value;
+                        fieldBadge.className = `field-badge ${type}${this.checked ? ' array' : ''}`;
+                        fieldBadge.textContent = this.checked ? `array[${type}]` : type;
+                        
+                        updateSchemaDisplay();
+                    });
+                }
+                
+                const removeBtn = fieldItem.querySelector('.remove-field');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function() {
+                        fieldItem.remove();
+                        updateSchemaDisplay();
+                    });
+                }
+                
+                const addNestedBtn = fieldItem.querySelector('.add-nested-field');
+                if (addNestedBtn) {
+                    addNestedBtn.addEventListener('click', function() {
+                        const parentId = this.dataset.parent;
+                        const parentLevel = parseInt(document.getElementById(parentId).dataset.level);
+                        const nestedFieldsContainer = document.getElementById(parentId).querySelector('.nested-fields');
+                        
+                        const nestedField = createFieldItem('string', '', '', false, parentLevel + 1, parentId);
+                        nestedFieldsContainer.appendChild(nestedField);
+                        updateSchemaDisplay();
+                    });
+                }
+
+                // Drag and drop functionality
+                const dragHandle = fieldItem.querySelector('.drag-handle');
+                dragHandle.addEventListener('mousedown', function(e) {
+                    if (level > 0) {
+                        // Don't allow dragging nested fields
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    draggedItem = fieldItem;
+                    fieldItem.classList.add('dragging');
+                    
+                    // Create drop indicators
+                    const fieldItems = document.querySelectorAll('.field-item[data-level="0"]');
+                    fieldItems.forEach((item, index) => {
+                        if (item !== draggedItem) {
+                            const indicator = document.createElement('div');
+                            indicator.className = 'drop-indicator';
+                            indicator.dataset.index = index;
+                            fieldsContainer.insertBefore(indicator, item);
+                            
+                            // Add indicator after last item
+                            if (index === fieldItems.length - 1) {
+                                const lastIndicator = document.createElement('div');
+                                lastIndicator.className = 'drop-indicator';
+                                lastIndicator.dataset.index = fieldItems.length;
+                                fieldsContainer.appendChild(lastIndicator);
+                            }
+                        }
+                    });
+                    
+                    // If no fields yet, add a single indicator
+                    if (fieldItems.length === 1 && fieldItems[0] === draggedItem) {
+                        const indicator = document.createElement('div');
+                        indicator.className = 'drop-indicator';
+                        indicator.dataset.index = 0;
+                        fieldsContainer.appendChild(indicator);
+                    }
+                    
+                    document.addEventListener('mousemove', handleDragMove);
+                    document.addEventListener('mouseup', handleDragEnd);
+                });
+                
+                return fieldItem;
+            }
+
+            function handleDragMove(e) {
+                if (!draggedItem) return;
+                
+                // Update position
+                const indicators = document.querySelectorAll('.drop-indicator');
+                indicators.forEach(indicator => {
+                    const rect = indicator.getBoundingClientRect();
+                    if (e.clientY > rect.top - 10 && e.clientY < rect.bottom + 10) {
+                        indicator.style.display = 'block';
+                        dropTarget = indicator;
+                    } else {
+                        indicator.style.display = 'none';
+                    }
+                });
+            }
+
+            function handleDragEnd() {
+                if (!draggedItem) return;
+                
+                if (dropTarget) {
+                    const targetIndex = parseInt(dropTarget.dataset.index);
+                    const items = Array.from(document.querySelectorAll('.field-item[data-level="0"]'));
+                    const currentIndex = items.indexOf(draggedItem);
+                    
+                    // Remove and reinsert at new position
+                    draggedItem.remove();
+                    
+                    if (targetIndex === items.length) {
+                        // Add to the end
+                        fieldsContainer.appendChild(draggedItem);
+                    } else {
+                        const targetItem = items[targetIndex === currentIndex ? targetIndex + 1 : targetIndex];
+                        if (targetItem) {
+                            fieldsContainer.insertBefore(draggedItem, targetItem);
+                        } else {
+                            fieldsContainer.appendChild(draggedItem);
+                        }
+                    }
+                    
+                    updateSchemaDisplay();
+                }
+                
+                // Clean up
+                draggedItem.classList.remove('dragging');
+                draggedItem = null;
+                dropTarget = null;
+                
+                document.removeEventListener('mousemove', handleDragMove);
+                document.removeEventListener('mouseup', handleDragEnd);
+                
+                // Remove all indicators
+                document.querySelectorAll('.drop-indicator').forEach(el => el.remove());
+            }
+
+            function parseSchema(schemaText) {
+                try {
+                    const schema = JSON.parse(schemaText);
+                    
+                    // Verify that this is a valid JSON Schema
+                    if (schema.type !== 'object' || !schema.properties) {
+                        throw new Error('Schema must be an object type with properties');
+                    }
+                    
+                    // Clear existing fields
+                    fieldsContainer.innerHTML = '';
+                    
+                    // Process each property
+                    const processProperties = (properties, level = 0, parentId = null) => {
+                        for (const [name, propSchema] of Object.entries(properties)) {
+                            let type = propSchema.type;
+                            let isArray = false;
+                            let itemSchema = propSchema;
+                            
+                            // Check if it's an array
+                            if (type === 'array' && propSchema.items) {
+                                isArray = true;
+                                itemSchema = propSchema.items;
+                                type = itemSchema.type;
+                            }
+                            
+                            const description = itemSchema.description || '';
+                            
+                            // Create the field
+                            const field = createFieldItem(
+                                type, 
+                                name, 
+                                description, 
+                                isArray,
+                                level,
+                                parentId
+                            );
+                            
+                            if (level === 0) {
+                                fieldsContainer.appendChild(field);
+                            } else if (parentId) {
+                                const parent = document.getElementById(parentId);
+                                const nestedContainer = parent.querySelector('.nested-fields');
+                                nestedContainer.appendChild(field);
+                            }
+                            
+                            // Process nested properties if this is an object
+                            if (type === 'object' && itemSchema.properties) {
+                                processProperties(itemSchema.properties, level + 1, field.id);
+                            }
+                        }
+                    };
+                    
+                    processProperties(schema.properties);
+                    updateSchemaDisplay();
+                    
+                    showNotification(notificationSchema, 'Schema parsed successfully!', 'success');
+                } catch (error) {
+                    showNotification(notificationSchema, `Error parsing schema: ${error.message}`, 'error');
+                }
+            }
+
+            // Event Listeners
+            addFieldBtn.addEventListener('click', function() {
+                console.log("Add Field button clicked");
+                const field = createFieldItem();
+                fieldsContainer.appendChild(field);
+                updateSchemaDisplay();
+                console.log("New field added");
+            });
+
+            clearFieldsBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all fields?')) {
+                    fieldsContainer.innerHTML = '';
+                    updateSchemaDisplay();
+                }
+            });
+
+            copySchemaBtn.addEventListener('click', function() {
+                const schema = generateSchema();
+                if (schema === '// Add fields to generate schema') {
+                    showNotification(notificationSchema, 'No schema to copy. Add fields first.', 'error');
+                    return;
+                }
+                
+                navigator.clipboard.writeText(schema).then(() => {
+                    showCopyNotification();
+                });
+            });
+
+            copyEscapedBtn.addEventListener('click', function() {
+                const schema = generateSchema();
+                if (schema === '// Add fields to generate schema') {
+                    showNotification(notificationSchema, 'No schema to copy. Add fields first.', 'error');
+                    return;
+                }
+                
+                const escaped = schema.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+                navigator.clipboard.writeText(escaped).then(() => {
+                    showCopyNotification('Escaped schema copied!');
+                });
+            });
+
+            copyApiBtn.addEventListener('click', function() {
+                const schema = generateSchema();
+                if (schema === '// Add fields to generate schema') {
+                    showNotification(notificationSchema, 'No schema to copy. Add fields first.', 'error');
+                    return;
+                }
+                
+                const apiReady = schema.replace(/\n/g, '').replace(/\s{2,}/g, ' ');
+                navigator.clipboard.writeText(apiReady).then(() => {
+                    showCopyNotification('API-ready schema copied!');
+                });
+            });
+
+            downloadSchemaBtn.addEventListener('click', function() {
+                const schema = generateSchema();
+                if (schema === '// Add fields to generate schema') {
+                    showNotification(notificationSchema, 'No schema to download. Add fields first.', 'error');
+                    return;
+                }
+                
+                const blob = new Blob([schema], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'schema.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+
+            parseSchemaBtn.addEventListener('click', function() {
+                const schemaText = schemaInput.value.trim();
+                if (!schemaText) {
+                    showNotification(notificationSchema, 'Please paste a schema to parse.', 'error');
+                    return;
+                }
+                
+                parseSchema(schemaText);
+            });
+
+            clearSchemaBtn.addEventListener('click', function() {
+                schemaInput.value = '';
+                schemaDisplay.innerHTML = '// Your schema will appear here';
+            });
+
+            // Initialize with a sample field
+            console.log("Adding initial field...");
+            const initialField = createFieldItem();
+            fieldsContainer.appendChild(initialField);
+            updateSchemaDisplay();
+            console.log("Initial field added successfully.");
+        });
+    </script>
+</body>
+</html>

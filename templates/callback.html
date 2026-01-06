@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Callback</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        h1 { color: #333; }
+        p { color: #555; word-break: break-all; max-width: 600px; }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: left;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .countdown {
+            font-size: 1.2em;
+            color: #007bff;
+            margin: 20px 0;
+        }
+        .redirect-link {
+            margin-top: 20px;
+        }
+        .redirect-link a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .redirect-link a:hover {
+            text-decoration: underline;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authentication Successful</h1>
+        <div id="status" class="status"></div>
+        <p>Your access token has been saved and is displayed below:</p>
+        <pre id="token-display"></pre>
+        <div class="countdown" id="countdown">This page will close automatically in <span id="timer">5</span> seconds...</div>
+        <div class="redirect-link">
+            <a href="/" id="home-link">Click here to go to Home Page</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            const statusDiv = document.getElementById('status');
+            const tokenDisplay = document.getElementById('token-display');
+            const countdown = document.getElementById('countdown');
+            const timer = document.getElementById('timer');
+
+            if (accessToken) {
+                // Display the access token
+                tokenDisplay.textContent = accessToken;
+                console.log('Access Token:', accessToken);
+
+                // Save access token via API
+                try {
+                    const response = await fetch('/api/save-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ accessToken })
+                    });
+
+                    if (response.ok) {
+                        statusDiv.textContent = '✅ Access token saved successfully!';
+                        statusDiv.className = 'status success';
+                    } else {
+                        throw new Error('Failed to save token');
+                    }
+                } catch (error) {
+                    console.error('Error saving token:', error);
+                    statusDiv.textContent = '❌ Error saving access token to file';
+                    statusDiv.className = 'status error';
+                }
+
+                // Countdown timer and redirect
+                let secondsLeft = 3;
+                const countdownInterval = setInterval(() => {
+                    secondsLeft--;
+                    timer.textContent = secondsLeft;
+                    
+                    if (secondsLeft <= 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = '/';
+                    }
+                }, 1000);
+
+            } else {
+                tokenDisplay.textContent = 'Error: Could not retrieve access token.';
+                statusDiv.textContent = '❌ Could not find access token in URL fragment';
+                statusDiv.className = 'status error';
+                countdown.style.display = 'none';
+                console.error('Could not find access token in URL fragment');
+            }
+        });
+    </script>
+</body>
+</html> 

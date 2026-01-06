@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salesforce Data Cloud IDP test platform</title>
+    <title>Salesforce Data Cloud Document AI test platform</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
@@ -25,6 +25,35 @@
             border-radius: 4px;
             margin-top: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .auth-section {
+            padding: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .auth-status.authenticated {
+            color: #28a745;
+        }
+        .auth-status.not-authenticated {
+            color: #dc3545;
+        }
+        .auth-btn {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .auth-btn:hover {
+            background-color: #0056b3;
         }
         .upload-section {
             padding: 20px;
@@ -48,17 +77,35 @@
             cursor: pointer;
         }
         .schema-input-wrapper {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
         }
-        .schema-input-wrapper textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
+        .json-jazz-btn {
+            background-color: #007bff;
+            color: #fff;
             border: none;
             border-radius: 4px;
-            resize: vertical;
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            margin-top: 0;
+            height: auto;
+            transition: background 0.2s;
+        }
+        .json-jazz-btn:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 600px) {
+            .schema-input-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .json-jazz-btn {
+                width: 100%;
+            }
         }
         .preview-section {
             padding: 20px;
@@ -78,6 +125,10 @@
         }
         .analyze-btn:hover {
             background-color: #3e8e41;
+        }
+        .analyze-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
         }
         .result-section {
             padding: 20px;
@@ -108,11 +159,31 @@
                 transform: rotate(360deg);
             }
         }
+        .ml-model-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Salesforce Data Cloud - IDP API Testbed</h1>
+        <h1>Salesforce Data Cloud - Document AI API Testbed</h1>
+        
+        <!-- Authentication Section -->
+        <div class="card">
+            <div class="auth-section">
+                <h2>Authentication</h2>
+                <div id="auth-status" class="auth-status">
+                    <span id="auth-icon">⏳</span>
+                    <span id="auth-message">Checking authentication status...</span>
+                </div>
+                <button id="auth-button" class="auth-btn" style="display: none;">🔐 Authenticate with Salesforce</button>
+            </div>
+        </div>
         
         <div class="card">
             <div class="upload-section">
@@ -127,9 +198,18 @@
                     </div>
                     
                     <div class="form-group">
+                        <label for="ml-model">ML Model</label>
+                        <select name="ml_model" id="ml-model" class="ml-model-select">
+                            <option value="llmgateway__VertexAIGemini20Flash001" selected>Gemini Fast</option>
+                            <option value="llmgateway__OpenAIGPT4Omni_08_06">OpenAI GPT-4o</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
                         <label for="schema">Schema</label>
                         <div class="schema-input-wrapper">
                             <textarea name="schema" id="schema" required placeholder="Enter your JSON schema here..."></textarea>
+                            <button type="button" id="open-json-jazz" class="json-jazz-btn" onclick="window.open('/static/json-jazz.html', '_blank')">Open JSON Schema Generator</button>
                         </div>
                     </div>
 
@@ -138,7 +218,7 @@
                         <img id="imagePreview" src="#" alt="Preview">
                     </div>
                     
-                    <button type="submit" class="analyze-btn">Analyze Document</button>
+                    <button type="submit" class="analyze-btn" id="analyze-btn" disabled>Analyze Document</button>
                 </form>
             </div>
         </div>

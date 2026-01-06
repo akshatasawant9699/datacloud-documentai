@@ -1,0 +1,78 @@
+DOCUMENT AI ESSENTIAL LINKS
+============================
+
+GETTING STARTED
+---------------
+Salesforce Document AI Setup: https://help.salesforce.com/s/articleView?id=sf.document_ai_setup.htm
+Google Cloud Document AI: https://cloud.google.com/document-ai/docs
+API Reference: https://developer.salesforce.com/docs/atlas.en-us.document_ai_api.meta/document_ai_api/
+
+DEVELOPMENT TOOLS
+-----------------
+Code Samples: https://github.com/salesforce/document-ai-samples
+Google Cloud Samples: https://github.com/GoogleCloudPlatform/document-ai-samples
+Python SDK: https://pypi.org/project/salesforce-document-ai/
+Google Cloud Python Client: https://pypi.org/project/google-cloud-documentai/
+
+IMPLEMENTATION GUIDES
+---------------------
+Contact Enrichment: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/contact_enrichment.htm
+Loan Processing: https://cloud.google.com/document-ai/docs/loan-processing
+Flow Integration: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/flow_integration.htm
+Apex Integration: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/apex_integration.htm
+
+USE CASES
+---------
+Invoice Processing: https://cloud.google.com/document-ai/docs/process-invoices
+Contract Analysis: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/contract_analysis.htm
+Resume Processing: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/resume_processing.htm
+Financial Documents: https://cloud.google.com/document-ai/docs/financial-documents
+
+SUPPORT & COMMUNITY
+-------------------
+Troubleshooting: https://help.salesforce.com/s/articleView?id=sf.document_ai_troubleshooting.htm
+Salesforce Community: https://developer.salesforce.com/forums/
+Document AI Forum: https://trailblazer.salesforce.com/trailblazercommunity/groups/0F93A000000LhN8SAK
+Stack Overflow: https://stackoverflow.com/questions/tagged/document-ai
+
+LEARNING RESOURCES
+------------------
+Trailhead: https://trailhead.salesforce.com/content/learn/trails/document-ai
+Google Cloud Training: https://cloud.google.com/training/document-ai
+Webinar Series: https://developer.salesforce.com/events/document-ai
+
+SECURITY & COMPLIANCE
+---------------------
+Security Guide: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/security_guide.htm
+Data Privacy: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/privacy.htm
+GDPR Compliance: https://help.salesforce.com/s/articleView?id=sf.document_ai_gdpr.htm
+
+MONITORING & ANALYTICS
+----------------------
+Document AI Monitoring: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/monitoring.htm
+Performance Analytics: https://cloud.google.com/document-ai/docs/monitor-performance
+
+AUTHENTICATION
+--------------
+OAuth Setup: https://help.salesforce.com/s/articleView?id=sf.oauth_document_ai.htm
+API Authentication: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/authentication.htm
+
+QUICK REFERENCE
+===============
+Copy and paste these essential links for quick access:
+
+Salesforce Document AI Setup: https://help.salesforce.com/s/articleView?id=sf.document_ai_setup.htm
+Google Cloud Document AI: https://cloud.google.com/document-ai/docs
+API Reference: https://developer.salesforce.com/docs/atlas.en-us.document_ai_api.meta/document_ai_api/
+Code Samples: https://github.com/salesforce/document-ai-samples
+Python SDK: https://pypi.org/project/salesforce-document-ai/
+Contact Enrichment: https://developer.salesforce.com/docs/atlas.en-us.document_ai.meta/document_ai/contact_enrichment.htm
+Loan Processing: https://cloud.google.com/document-ai/docs/loan-processing
+Troubleshooting: https://help.salesforce.com/s/articleView?id=sf.document_ai_troubleshooting.htm
+Community Forum: https://trailblazer.salesforce.com/trailblazercommunity/groups/0F93A000000LhN8SAK
+Trailhead: https://trailhead.salesforce.com/content/learn/trails/document-ai
+
+---
+Last Updated: [Current Date]
+Maintained by: Document AI Implementation Team
+

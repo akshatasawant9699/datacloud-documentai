@@ -1,0 +1,44 @@
+{
+  "type": "object",
+  "properties": {
+    "form_title": {"type": "string", "description": "Title at top of page 1"},
+    
+    "patient_first_name": {"type": "string", "description": "Patient First Name from Page 1"},
+    "patient_last_name": {"type": "string", "description": "Patient Last Name from Page 1"},
+    "patient_dob": {"type": "string", "description": "Patient Date of Birth from Page 1"},
+    "patient_address": {"type": "string", "description": "Patient Street Address from Page 1"},
+    "patient_city": {"type": "string", "description": "Patient City from Page 1"},
+    "patient_state": {"type": "string", "description": "Patient State from Page 1"},
+    "patient_zip": {"type": "string", "description": "Patient Zip Code from Page 1"},
+    "patient_phone": {"type": "string", "description": "Patient Phone Number from Page 1"},
+    "patient_email": {"type": "string", "description": "Patient Email from Page 1"},
+    "patient_gender": {"type": "string", "description": "Patient Gender from Page 1"},
+    "patient_income": {"type": "string", "description": "Annual Household Income from Page 1"},
+    "household_size": {"type": "string", "description": "Number in Household from Page 1"},
+
+    "facility_npi": {"type": "string", "description": "Facility NPI from Page 3 Section 2"},
+    "facility_name": {"type": "string", "description": "Facility Name from Page 3 Section 2"},
+    "hcp_first_name": {"type": "string", "description": "HCP First Name from Page 3 Section 2"},
+    "hcp_last_name": {"type": "string", "description": "HCP Last Name from Page 3 Section 2"},
+    "hcp_npi": {"type": "string", "description": "HCP NPI from Page 3 Section 2"},
+    "hcp_address": {"type": "string", "description": "Address from Page 3 Section 2"},
+    "hcp_suite": {"type": "string", "description": "Suite No from Page 3 Section 2"},
+    "hcp_city": {"type": "string", "description": "City from Page 3 Section 2"},
+    "hcp_state": {"type": "string", "description": "State from Page 3 Section 2"},
+    "hcp_zip": {"type": "string", "description": "Zip from Page 3 Section 2"},
+    "hcp_phone": {"type": "string", "description": "HCP Phone from Page 3 Section 2"},
+    "hcp_fax": {"type": "string", "description": "HCP Fax from Page 3 Section 2"},
+
+    "office_contact_name": {"type": "string", "description": "OC First Name from Page 3 Section 3"},
+    "office_contact_last_name": {"type": "string", "description": "OC Last Name from Page 3 Section 3"},
+    "office_contact_phone": {"type": "string", "description": "OC Phone from Page 3 Section 3"},
+    "office_contact_email": {"type": "string", "description": "Email from Page 3 Section 3"},
+
+    "rx_patient_name": {"type": "string", "description": "Patient First Name from Page 3 Section 4"},
+    "rx_patient_dob": {"type": "string", "description": "Date of Birth from Page 3 Section 4"},
+    "rx_medication": {"type": "string", "description": "Medication from Page 3 Section 4"},
+    "rx_quantity": {"type": "string", "description": "Quantity from Page 3 Section 4"},
+    "rx_directions": {"type": "string", "description": "Directions from Page 3 Section 4"},
+    "rx_refills": {"type": "string", "description": "Refills from Page 3 Section 4"}
+  }
+}

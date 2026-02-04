@@ -24,6 +24,7 @@ var/
 venv/
 ENV/
 env/
+.venv/
 
 # Flask specific
 instance/
@@ -34,6 +35,7 @@ instance/
 .vscode/
 *.swp
 *.swo
+*.sublime-*
 
 # OS specific files
 .DS_Store
@@ -44,9 +46,42 @@ instance/
 ehthumbs.db
 Thumbs.db
 
-# Environment variables
+# Environment variables - NEVER commit these
 .env
+.env.local
+.env.*.local
+*.env
 
-# Authentication tokens
+# Authentication tokens and secrets - NEVER commit these
 access-token.secret
 auth_token.json
+*.secret
+*.pem
+*.key
+credentials.json
+
+# Sample documents (may contain sensitive data)
+sample-documents/
+
+# Vercel
+.vercel
+
+# Node modules (if any)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Cursor/Editor specific
+.cursor/
+agent-transcripts/
+assets/
+
+# Base64 encoded files (may contain document data)
+*_base64.txt
+*_base64.json
+
+# Request files with potential data
+*_request.json
+*_request_*.json

@@ -1,0 +1,178 @@
+{
+  "type": "object",
+  "properties": {
+    "document_type": {
+      "type": "string",
+      "description": "Identify the document type. MUST return either 'Invoice' or 'Sales Order'. Return 'Invoice' if the document is an invoice, bill, faktura, factura, rechnung, or similar billing document. Return 'Sales Order' if the document is a sales order, purchase order, order confirmation, or objednávka. Look for keywords in any language."
+    },
+    "document_number": {
+      "type": "string",
+      "description": "The primary document identifier - Order Number for Sales Orders, Invoice Number for Invoices."
+    },
+    "document_date": {
+      "type": "string",
+      "description": "Date of the document - Order Date for Sales Orders, Invoice Date for Invoices."
+    },
+    
+    "customer_name": {
+      "type": "string",
+      "description": "Name of the customer or buyer."
+    },
+    "customer_address": {
+      "type": "string",
+      "description": "Full address of the customer."
+    },
+    "customer_city": {
+      "type": "string",
+      "description": "Customer city."
+    },
+    "customer_state": {
+      "type": "string",
+      "description": "Customer state or region."
+    },
+    "customer_zip": {
+      "type": "string",
+      "description": "Customer postal/ZIP code."
+    },
+    "customer_country": {
+      "type": "string",
+      "description": "Customer country."
+    },
+    "customer_phone": {
+      "type": "string",
+      "description": "Customer phone number."
+    },
+    "customer_email": {
+      "type": "string",
+      "description": "Customer email address."
+    },
+    
+    "vendor_name": {
+      "type": "string",
+      "description": "Name of the vendor/seller/supplier."
+    },
+    "vendor_address": {
+      "type": "string",
+      "description": "Full address of the vendor."
+    },
+    "vendor_phone": {
+      "type": "string",
+      "description": "Vendor phone number."
+    },
+    "vendor_email": {
+      "type": "string",
+      "description": "Vendor email address."
+    },
+    
+    "sales_order_number": {
+      "type": "string",
+      "description": "Sales Order number (if document is a Sales Order)."
+    },
+    "purchase_order_number": {
+      "type": "string",
+      "description": "Purchase Order or PO number referenced."
+    },
+    "order_date": {
+      "type": "string",
+      "description": "Date of the order."
+    },
+    "delivery_date": {
+      "type": "string",
+      "description": "Expected or requested delivery date."
+    },
+    "payment_terms": {
+      "type": "string",
+      "description": "Payment terms (e.g., Net 30, Due on Receipt)."
+    },
+    "delivery_conditions": {
+      "type": "string",
+      "description": "Delivery terms or shipping conditions (e.g., FOB, CIF)."
+    },
+    "shipping_method": {
+      "type": "string",
+      "description": "Shipping method or carrier."
+    },
+    
+    "invoice_number": {
+      "type": "string",
+      "description": "Invoice number (if document is an Invoice)."
+    },
+    "invoice_date": {
+      "type": "string",
+      "description": "Date the invoice was issued."
+    },
+    "due_date": {
+      "type": "string",
+      "description": "Payment due date."
+    },
+    "reference_number": {
+      "type": "string",
+      "description": "Any reference number on the document."
+    },
+    
+    "line_items": {
+      "type": "array",
+      "description": "List of items/products on the document.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_number": {"type": "string", "description": "Line item number or sequence."},
+          "item_code": {"type": "string", "description": "Product code, SKU, or part number."},
+          "description": {"type": "string", "description": "Item description."},
+          "quantity": {"type": "number", "description": "Quantity ordered or invoiced."},
+          "unit": {"type": "string", "description": "Unit of measure (e.g., EA, BOX, KG)."},
+          "unit_price": {"type": "number", "description": "Price per unit."},
+          "discount": {"type": "number", "description": "Discount amount or percentage."},
+          "tax": {"type": "number", "description": "Tax amount for this line."},
+          "line_total": {"type": "number", "description": "Total for this line item."}
+        }
+      }
+    },
+    
+    "currency": {
+      "type": "string",
+      "description": "Currency code (e.g., USD, EUR, INR)."
+    },
+    "subtotal": {
+      "type": "number",
+      "description": "Subtotal before tax and discounts."
+    },
+    "discount_total": {
+      "type": "number",
+      "description": "Total discount amount."
+    },
+    "tax_rate": {
+      "type": "string",
+      "description": "Tax rate percentage."
+    },
+    "tax_amount": {
+      "type": "number",
+      "description": "Total tax amount."
+    },
+    "shipping_charges": {
+      "type": "number",
+      "description": "Shipping or freight charges."
+    },
+    "total_amount": {
+      "type": "number",
+      "description": "Grand total amount."
+    },
+    "amount_paid": {
+      "type": "number",
+      "description": "Amount already paid."
+    },
+    "balance_due": {
+      "type": "number",
+      "description": "Balance remaining to be paid."
+    },
+    
+    "notes": {
+      "type": "string",
+      "description": "Any notes, comments, or special instructions on the document."
+    },
+    "terms_conditions": {
+      "type": "string",
+      "description": "Terms and conditions text."
+    }
+  }
+}

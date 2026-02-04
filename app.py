@@ -173,8 +173,9 @@ def extract_data():
         base64_data = base64.b64encode(file_data).decode('utf-8')
 
         # Use dynamic instance_url from token file
+        # Include extractDataWithConfidenceScore=true to get confidence scores
         instance_url = api_client.get_instance_url()
-        url = f"{instance_url}/services/data/{API_VERSION}/ssot/document-processing/actions/extract-data"
+        url = f"{instance_url}/services/data/{API_VERSION}/ssot/document-processing/actions/extract-data?htmlEncode=false&extractDataWithConfidenceScore=true"
 
         payload = {
             "mlModel": ml_model,

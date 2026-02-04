@@ -1,0 +1,167 @@
+{
+  "type": "multi_invoice_extraction",
+  "description": "Schema for extracting data from combined documents containing multiple invoices (50+ form types, 10-30+ pages)",
+  "extractMultiple": true,
+  "documents": [
+    {
+      "documentType": "invoice",
+      "fields": {
+        "document_metadata": {
+          "document_type": { "type": "string", "description": "Type of document (Invoice, Credit Note, Debit Note, etc.)" },
+          "page_number": { "type": "integer", "description": "Page number in the combined document" },
+          "document_id": { "type": "string", "description": "Unique identifier for this document within the batch" }
+        },
+        "invoice_header": {
+          "invoice_number": { "type": "string", "description": "Unique invoice number/ID" },
+          "invoice_date": { "type": "string", "format": "date", "description": "Date the invoice was issued" },
+          "due_date": { "type": "string", "format": "date", "description": "Payment due date" },
+          "purchase_order_number": { "type": "string", "description": "Associated purchase order number" },
+          "sales_order_number": { "type": "string", "description": "Sales order reference number" },
+          "account_number": { "type": "string", "description": "Customer account number" },
+          "reference_number": { "type": "string", "description": "Additional reference number" },
+          "quote_number": { "type": "string", "description": "Quote or estimate number" },
+          "contract_number": { "type": "string", "description": "Contract or agreement number" },
+          "invoice_type": { "type": "string", "description": "Type (Standard, Proforma, Commercial, etc.)" },
+          "invoice_status": { "type": "string", "description": "Status (Draft, Sent, Paid, Overdue)" }
+        },
+        "vendor_information": {
+          "vendor_name": { "type": "string", "description": "Seller/Vendor company name" },
+          "vendor_dba": { "type": "string", "description": "Vendor doing-business-as name" },
+          "vendor_address_line_1": { "type": "string", "description": "Vendor street address line 1" },
+          "vendor_address_line_2": { "type": "string", "description": "Vendor street address line 2" },
+          "vendor_city": { "type": "string", "description": "Vendor city" },
+          "vendor_state": { "type": "string", "description": "Vendor state/province" },
+          "vendor_zip_code": { "type": "string", "description": "Vendor postal/ZIP code" },
+          "vendor_country": { "type": "string", "description": "Vendor country" },
+          "vendor_phone": { "type": "string", "description": "Vendor phone number" },
+          "vendor_fax": { "type": "string", "description": "Vendor fax number" },
+          "vendor_email": { "type": "string", "format": "email", "description": "Vendor email address" },
+          "vendor_website": { "type": "string", "format": "uri", "description": "Vendor website URL" },
+          "vendor_tax_id": { "type": "string", "description": "Vendor Tax ID / EIN / VAT number" },
+          "vendor_duns_number": { "type": "string", "description": "Vendor DUNS number" },
+          "vendor_contact_name": { "type": "string", "description": "Vendor contact person name" },
+          "vendor_contact_phone": { "type": "string", "description": "Vendor contact direct phone" },
+          "vendor_contact_email": { "type": "string", "format": "email", "description": "Vendor contact email" }
+        },
+        "customer_information": {
+          "customer_name": { "type": "string", "description": "Buyer/Customer company name" },
+          "customer_id": { "type": "string", "description": "Customer ID/Number" },
+          "customer_address_line_1": { "type": "string", "description": "Customer street address line 1" },
+          "customer_address_line_2": { "type": "string", "description": "Customer street address line 2" },
+          "customer_city": { "type": "string", "description": "Customer city" },
+          "customer_state": { "type": "string", "description": "Customer state/province" },
+          "customer_zip_code": { "type": "string", "description": "Customer postal/ZIP code" },
+          "customer_country": { "type": "string", "description": "Customer country" },
+          "customer_phone": { "type": "string", "description": "Customer phone number" },
+          "customer_fax": { "type": "string", "description": "Customer fax number" },
+          "customer_email": { "type": "string", "format": "email", "description": "Customer email address" },
+          "customer_contact_name": { "type": "string", "description": "Customer contact person" },
+          "customer_tax_id": { "type": "string", "description": "Customer Tax ID / EIN / VAT" }
+        },
+        "billing_address": {
+          "bill_to_name": { "type": "string", "description": "Bill To company/person name" },
+          "bill_to_attention": { "type": "string", "description": "Bill To attention line" },
+          "bill_to_address_line_1": { "type": "string", "description": "Bill To street address line 1" },
+          "bill_to_address_line_2": { "type": "string", "description": "Bill To street address line 2" },
+          "bill_to_city": { "type": "string", "description": "Bill To city" },
+          "bill_to_state": { "type": "string", "description": "Bill To state/province" },
+          "bill_to_zip_code": { "type": "string", "description": "Bill To postal/ZIP code" },
+          "bill_to_country": { "type": "string", "description": "Bill To country" }
+        },
+        "shipping_address": {
+          "ship_to_name": { "type": "string", "description": "Ship To company/person name" },
+          "ship_to_attention": { "type": "string", "description": "Ship To attention line" },
+          "ship_to_address_line_1": { "type": "string", "description": "Ship To street address line 1" },
+          "ship_to_address_line_2": { "type": "string", "description": "Ship To street address line 2" },
+          "ship_to_city": { "type": "string", "description": "Ship To city" },
+          "ship_to_state": { "type": "string", "description": "Ship To state/province" },
+          "ship_to_zip_code": { "type": "string", "description": "Ship To postal/ZIP code" },
+          "ship_to_country": { "type": "string", "description": "Ship To country" }
+        },
+        "shipping_details": {
+          "shipping_method": { "type": "string", "description": "Shipping carrier/method" },
+          "tracking_number": { "type": "string", "description": "Shipment tracking number" },
+          "ship_date": { "type": "string", "format": "date", "description": "Date items were shipped" },
+          "delivery_date": { "type": "string", "format": "date", "description": "Expected/actual delivery date" },
+          "fob_point": { "type": "string", "description": "FOB point (Origin/Destination)" },
+          "incoterms": { "type": "string", "description": "Incoterms (EXW, FOB, CIF, etc.)" },
+          "freight_terms": { "type": "string", "description": "Freight terms (Prepaid/Collect)" },
+          "carrier_name": { "type": "string", "description": "Carrier/Freight company name" },
+          "weight": { "type": "string", "description": "Total shipment weight" },
+          "number_of_packages": { "type": "integer", "description": "Number of packages/boxes" }
+        },
+        "line_items": {
+          "type": "array",
+          "description": "List of invoice line items",
+          "items": {
+            "line_number": { "type": "integer", "description": "Line item sequence number" },
+            "item_code": { "type": "string", "description": "Item code/SKU/Part number" },
+            "item_description": { "type": "string", "description": "Item description" },
+            "quantity": { "type": "number", "description": "Quantity ordered/shipped" },
+            "unit_of_measure": { "type": "string", "description": "Unit of measure (EA, BOX, LB, etc.)" },
+            "unit_price": { "type": "number", "description": "Price per unit" },
+            "extended_price": { "type": "number", "description": "Line total before adjustments" },
+            "discount_percent": { "type": "number", "description": "Discount percentage" },
+            "discount_amount": { "type": "number", "description": "Discount amount" },
+            "tax_code": { "type": "string", "description": "Tax code/category" },
+            "tax_rate": { "type": "number", "description": "Tax rate percentage" },
+            "tax_amount": { "type": "number", "description": "Tax amount for line" },
+            "line_total": { "type": "number", "description": "Final line total" },
+            "serial_number": { "type": "string", "description": "Item serial number" },
+            "lot_number": { "type": "string", "description": "Lot/Batch number" },
+            "expiration_date": { "type": "string", "format": "date", "description": "Item expiration date" }
+          }
+        },
+        "financial_summary": {
+          "currency_code": { "type": "string", "description": "Currency code (USD, EUR, etc.)" },
+          "subtotal": { "type": "number", "description": "Subtotal before adjustments" },
+          "discount_total": { "type": "number", "description": "Total discounts applied" },
+          "taxable_amount": { "type": "number", "description": "Total taxable amount" },
+          "non_taxable_amount": { "type": "number", "description": "Total non-taxable amount" },
+          "sales_tax": { "type": "number", "description": "Sales tax amount" },
+          "state_tax": { "type": "number", "description": "State tax amount" },
+          "local_tax": { "type": "number", "description": "Local/City tax amount" },
+          "vat_amount": { "type": "number", "description": "VAT amount" },
+          "tax_total": { "type": "number", "description": "Total tax amount" },
+          "shipping_cost": { "type": "number", "description": "Shipping charges" },
+          "handling_fee": { "type": "number", "description": "Handling fees" },
+          "insurance_fee": { "type": "number", "description": "Insurance charges" },
+          "miscellaneous_charges": { "type": "number", "description": "Other miscellaneous charges" },
+          "total_amount": { "type": "number", "description": "Total invoice amount" },
+          "deposit_applied": { "type": "number", "description": "Deposit/Prepayment applied" },
+          "credits_applied": { "type": "number", "description": "Credits applied" },
+          "amount_paid": { "type": "number", "description": "Amount already paid" },
+          "balance_due": { "type": "number", "description": "Balance remaining due" }
+        },
+        "payment_information": {
+          "payment_terms": { "type": "string", "description": "Payment terms (Net 30, 2/10 Net 30, etc.)" },
+          "payment_method": { "type": "string", "description": "Accepted payment methods" },
+          "bank_name": { "type": "string", "description": "Bank name for wire transfer" },
+          "bank_address": { "type": "string", "description": "Bank address" },
+          "bank_account_name": { "type": "string", "description": "Account holder name" },
+          "bank_account_number": { "type": "string", "description": "Bank account number" },
+          "bank_routing_number": { "type": "string", "description": "ABA routing number" },
+          "swift_code": { "type": "string", "description": "SWIFT/BIC code" },
+          "iban": { "type": "string", "description": "IBAN number" },
+          "credit_card_accepted": { "type": "string", "description": "Accepted credit cards" },
+          "remittance_address": { "type": "string", "description": "Where to send payment" }
+        },
+        "additional_information": {
+          "notes": { "type": "string", "description": "Invoice notes/comments" },
+          "special_instructions": { "type": "string", "description": "Special handling instructions" },
+          "terms_and_conditions": { "type": "string", "description": "Terms and conditions text" },
+          "warranty_information": { "type": "string", "description": "Warranty details" },
+          "return_policy": { "type": "string", "description": "Return policy information" },
+          "late_fee_policy": { "type": "string", "description": "Late payment fee policy" },
+          "approved_by": { "type": "string", "description": "Approval signature/name" },
+          "sales_rep": { "type": "string", "description": "Sales representative name" },
+          "sales_rep_phone": { "type": "string", "description": "Sales rep phone number" },
+          "sales_rep_email": { "type": "string", "format": "email", "description": "Sales rep email" },
+          "department": { "type": "string", "description": "Department/Cost center" },
+          "project_code": { "type": "string", "description": "Project code/ID" },
+          "gl_code": { "type": "string", "description": "General ledger account code" }
+        }
+      }
+    }
+  ]
+}

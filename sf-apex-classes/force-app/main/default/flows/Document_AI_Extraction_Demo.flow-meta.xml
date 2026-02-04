@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <description>End-to-end demo for Document AI extraction with confidence scores</description>
+    <label>Document AI Extraction Demo</label>
+    <processType>Flow</processType>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Upload_Document_Screen</targetReference>
+        </connector>
+    </start>
+    <status>Draft</status>
+    <interviewLabel>Document AI Extraction {!$Flow.CurrentDateTime}</interviewLabel>
+    
+    <!-- Variables -->
+    <variables>
+        <name>ContentDocumentId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <variables>
+        <name>SchemaConfig</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+        <value>
+            <stringValue>{"type":"object","properties":{"document_type":{"type":"string","description":"Identify: Sales Order, Invoice, Purchase Order, etc."},"document_number":{"type":"string","description":"Primary document identifier"},"document_date":{"type":"string","description":"Document date"},"customer_name":{"type":"string","description":"Customer name"},"vendor_name":{"type":"string","description":"Vendor name"},"total_amount":{"type":"number","description":"Total amount"},"currency":{"type":"string","description":"Currency"},"line_items":{"type":"array","description":"Line items","items":{"type":"object","properties":{"description":{"type":"string"},"quantity":{"type":"number"},"unit_price":{"type":"number"}}}}}}</stringValue>
+        </value>
+    </variables>
+    
+    <variables>
+        <name>ExtractedDataJSON</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <variables>
+        <name>ExtractionSuccess</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <variables>
+        <name>ErrorMessage</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <variables>
+        <name>DocumentTitle</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    
+    <!-- Screen: Upload Document -->
+    <screens>
+        <name>Upload_Document_Screen</name>
+        <label>Upload Document</label>
+        <locationX>200</locationX>
+        <locationY>100</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Extract_Document_Data</targetReference>
+        </connector>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+        <fields>
+            <name>Header_Text</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b&gt;Document AI Extraction Demo&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Upload any document (Sales Order, Invoice, Healthcare Form, etc.) and Document AI will extract the information with confidence scores.&lt;/p&gt;</fieldText>
+        </fields>
+        <fields>
+            <name>File_Upload</name>
+            <extensionName>forceContent:fileUpload</extensionName>
+            <fieldType>ComponentInstance</fieldType>
+            <inputParameters>
+                <name>label</name>
+                <value>
+                    <stringValue>Upload Document</stringValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>multiple</name>
+                <value>
+                    <booleanValue>false</booleanValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>accept</name>
+                <value>
+                    <stringValue>.pdf,.png,.jpg,.jpeg</stringValue>
+                </value>
+            </inputParameters>
+            <isRequired>true</isRequired>
+            <outputParameters>
+                <assignToReference>ContentDocumentId</assignToReference>
+                <name>contentDocId</name>
+            </outputParameters>
+        </fields>
+        <fields>
+            <name>Schema_Selection</name>
+            <choiceReferences>Schema_Choices</choiceReferences>
+            <dataType>String</dataType>
+            <defaultValue>
+                <stringValue>default</stringValue>
+            </defaultValue>
+            <fieldText>Document Type</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+    </screens>
+    
+    <!-- Choice Set for Schema Types -->
+    <choices>
+        <name>Schema_Choices</name>
+        <choiceText>Auto-Detect (Any Document)</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>default</stringValue>
+        </value>
+    </choices>
+    
+    <!-- Action: Call Apex to Extract Data -->
+    <actionCalls>
+        <name>Extract_Document_Data</name>
+        <label>Extract Document Data</label>
+        <locationX>200</locationX>
+        <locationY>250</locationY>
+        <actionName>DocumentAIExtractor</actionName>
+        <actionType>apex</actionType>
+        <connector>
+            <targetReference>Check_Extraction_Success</targetReference>
+        </connector>
+        <faultConnector>
+            <targetReference>Error_Screen</targetReference>
+        </faultConnector>
+        <inputParameters>
+            <name>contentDocumentId</name>
+            <value>
+                <elementReference>ContentDocumentId</elementReference>
+            </value>
+        </inputParameters>
+        <inputParameters>
+            <name>schemaConfig</name>
+            <value>
+                <elementReference>SchemaConfig</elementReference>
+            </value>
+        </inputParameters>
+        <outputParameters>
+            <assignToReference>ExtractionSuccess</assignToReference>
+            <name>success</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>ExtractedDataJSON</assignToReference>
+            <name>extractedData</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>DocumentTitle</assignToReference>
+            <name>documentTitle</name>
+        </outputParameters>
+        <outputParameters>
+            <assignToReference>ErrorMessage</assignToReference>
+            <name>errorMessage</name>
+        </outputParameters>
+    </actionCalls>
+    
+    <!-- Decision: Check if Extraction was Successful -->
+    <decisions>
+        <name>Check_Extraction_Success</name>
+        <label>Check Extraction Success</label>
+        <locationX>200</locationX>
+        <locationY>400</locationY>
+        <defaultConnector>
+            <targetReference>Error_Screen</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Failed</defaultConnectorLabel>
+        <rules>
+            <name>Extraction_Succeeded</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>ExtractionSuccess</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Results_Screen</targetReference>
+            </connector>
+            <label>Success</label>
+        </rules>
+    </decisions>
+    
+    <!-- Screen: Display Results -->
+    <screens>
+        <name>Results_Screen</name>
+        <label>Extraction Results</label>
+        <locationX>400</locationX>
+        <locationY>400</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+        <fields>
+            <name>Success_Header</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b style="color: green;"&gt;✓ Document Processed Successfully&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Document: {!DocumentTitle}&lt;/p&gt;</fieldText>
+        </fields>
+        <fields>
+            <name>Results_Display</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b&gt;Extracted Data with Confidence Scores:&lt;/b&gt;&lt;/p&gt;&lt;pre style="background-color: #f4f4f4; padding: 10px; border-radius: 5px; white-space: pre-wrap;"&gt;{!ExtractedDataJSON}&lt;/pre&gt;</fieldText>
+        </fields>
+        <fields>
+            <name>Confidence_Legend</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p&gt;&lt;b&gt;Confidence Score Legend:&lt;/b&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;&lt;span style="color: green;"&gt;90%+ = High Confidence&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style="color: orange;"&gt;70-89% = Medium Confidence&lt;/span&gt;&lt;/li&gt;&lt;li&gt;&lt;span style="color: red;"&gt;&amp;lt;70% = Low Confidence (Review Required)&lt;/span&gt;&lt;/li&gt;&lt;/ul&gt;</fieldText>
+        </fields>
+    </screens>
+    
+    <!-- Screen: Error -->
+    <screens>
+        <name>Error_Screen</name>
+        <label>Error</label>
+        <locationX>600</locationX>
+        <locationY>400</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+        <fields>
+            <name>Error_Display</name>
+            <fieldType>DisplayText</fieldType>
+            <fieldText>&lt;p style="color: red;"&gt;&lt;b&gt;✗ Extraction Failed&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Error: {!ErrorMessage}&lt;/p&gt;&lt;p&gt;Please try again with a different document or contact your administrator.&lt;/p&gt;</fieldText>
+        </fields>
+    </screens>
+</Flow>

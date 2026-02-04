@@ -1,0 +1,151 @@
+<template>
+    <lightning-card title="Document AI Extractor" icon-name="standard:document">
+        <!-- File Upload Section -->
+        <div class="slds-p-around_medium">
+            <lightning-file-upload
+                label="Upload Document"
+                name="fileUploader"
+                accept={acceptedFormats}
+                record-id={recordId}
+                onuploadfinished={handleUploadFinished}
+                multiple="false">
+            </lightning-file-upload>
+            
+            <!-- Schema Selection -->
+            <div class="slds-m-top_medium">
+                <lightning-combobox
+                    name="schemaSelector"
+                    label="Document Type / Schema"
+                    value={selectedSchema}
+                    options={schemaOptions}
+                    onchange={handleSchemaChange}>
+                </lightning-combobox>
+            </div>
+            
+            <!-- Extract Button -->
+            <div class="slds-m-top_medium">
+                <lightning-button 
+                    variant="brand" 
+                    label="Extract Data"
+                    onclick={handleExtract}
+                    disabled={isExtractDisabled}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button 
+                    variant="neutral" 
+                    label="Clear"
+                    onclick={handleClear}>
+                </lightning-button>
+            </div>
+        </div>
+        
+        <!-- Loading Spinner -->
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium">
+                <lightning-spinner alternative-text="Processing..." size="medium"></lightning-spinner>
+                <p class="slds-text-align_center slds-m-top_medium">Extracting data from document...</p>
+            </div>
+        </template>
+        
+        <!-- Error Message -->
+        <template if:true={errorMessage}>
+            <div class="slds-p-around_medium">
+                <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">
+                    <span class="slds-assistive-text">error</span>
+                    <h2>{errorMessage}</h2>
+                </div>
+            </div>
+        </template>
+        
+        <!-- Results Section -->
+        <template if:true={hasResults}>
+            <div class="slds-p-around_medium">
+                <!-- Document Info Header -->
+                <div class="slds-box slds-m-bottom_medium">
+                    <div class="slds-grid slds-gutters">
+                        <div class="slds-col">
+                            <p class="slds-text-title_caps">Document</p>
+                            <p class="slds-text-heading_small">{documentTitle}</p>
+                        </div>
+                        <div class="slds-col">
+                            <p class="slds-text-title_caps">Type Detected</p>
+                            <p class="slds-text-heading_small">
+                                <lightning-badge label={documentType}></lightning-badge>
+                            </p>
+                        </div>
+                        <div class="slds-col">
+                            <p class="slds-text-title_caps">Fields Extracted</p>
+                            <p class="slds-text-heading_small">{fieldsWithValues} / {totalFields}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Extracted Fields Table -->
+                <h3 class="slds-text-heading_small slds-m-bottom_small">Extracted Data with Confidence Scores</h3>
+                
+                <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                    <thead>
+                        <tr class="slds-line-height_reset">
+                            <th scope="col" class="slds-text-title_caps" style="width: 25%;">Field Name</th>
+                            <th scope="col" class="slds-text-title_caps" style="width: 55%;">Value</th>
+                            <th scope="col" class="slds-text-title_caps slds-text-align_center" style="width: 20%;">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template for:each={extractedFields} for:item="field">
+                            <tr key={field.name}>
+                                <td>
+                                    <span class="slds-text-body_regular">{field.displayName}</span>
+                                </td>
+                                <td>
+                                    <template if:true={field.hasValue}>
+                                        <template if:true={field.isArray}>
+                                            <lightning-button 
+                                                variant="base" 
+                                                label="View Items"
+                                                onclick={handleViewArray}
+                                                data-field={field.name}>
+                                            </lightning-button>
+                                        </template>
+                                        <template if:false={field.isArray}>
+                                            <span class="slds-text-body_regular">{field.value}</span>
+                                        </template>
+                                    </template>
+                                    <template if:false={field.hasValue}>
+                                        <span class="slds-text-color_weak">—</span>
+                                    </template>
+                                </td>
+                                <td class="slds-text-align_center">
+                                    <template if:true={field.confidenceScore}>
+                                        <lightning-progress-ring 
+                                            value={field.confidencePercent} 
+                                            variant={field.variant}
+                                            size="medium">
+                                        </lightning-progress-ring>
+                                        <span class={field.confidenceClass}>{field.confidencePercent}%</span>
+                                    </template>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                
+                <!-- Raw JSON Toggle -->
+                <div class="slds-m-top_medium">
+                    <lightning-button 
+                        variant="neutral" 
+                        label={rawJsonButtonLabel}
+                        onclick={toggleRawJson}
+                        icon-name="utility:code">
+                    </lightning-button>
+                </div>
+                
+                <template if:true={showRawJson}>
+                    <div class="slds-m-top_small">
+                        <pre class="slds-box slds-theme_shade" style="overflow-x: auto; max-height: 400px;">{formattedRawJson}</pre>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </lightning-card>
+</template>

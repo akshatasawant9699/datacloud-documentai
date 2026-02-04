@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/app.py"
+    }
+  ],
+  "env": {
+    "LOGIN_URL": "@login_url",
+    "CLIENT_ID": "@client_id",
+    "CLIENT_SECRET": "@client_secret",
+    "API_VERSION": "@api_version"
+  }
+}

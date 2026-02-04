@@ -225,7 +225,39 @@
 
         <div id="result" class="result-section" style="display: none;">
             <h2>Analysis Result</h2>
-            <pre id="resultContent"></pre>
+            
+            <!-- Confidence Score Display -->
+            <div id="confidenceDisplay" style="margin-bottom: 20px; display: none;">
+                <!-- Document type indicator will be inserted here dynamically -->
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">📊 Extracted Fields with Confidence Scores</h3>
+                    <div style="font-size: 12px; color: #666; display: flex; gap: 15px;">
+                        <span><span style="color: #28a745;">🟢</span> High (90%+)</span>
+                        <span><span style="color: #ffc107;">🟡</span> Medium (70-89%)</span>
+                        <span><span style="color: #dc3545;">🔴</span> Low (&lt;70%)</span>
+                    </div>
+                </div>
+                
+                <table id="confidenceTable" style="width: 100%; border-collapse: collapse; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <th style="padding: 14px 12px; text-align: left; font-weight: 600;">Field</th>
+                            <th style="padding: 14px 12px; text-align: left; font-weight: 600;">Value</th>
+                            <th style="padding: 14px 12px; text-align: center; font-weight: 600; width: 120px;">Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="confidenceTableBody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                <button id="toggleRawJson" class="auth-btn" style="margin-bottom: 10px;">
+                    <span style="margin-right: 5px;">{ }</span> Show/Hide Raw JSON
+                </button>
+                <pre id="resultContent" style="display: none; background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 13px;"></pre>
+            </div>
         </div>
 
         <div id="loading" class="loading" style="display: none;">

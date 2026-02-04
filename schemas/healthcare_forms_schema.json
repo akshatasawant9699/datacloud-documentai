@@ -1,0 +1,138 @@
+{
+  "type": "object",
+  "properties": {
+    "documents": {
+      "type": "array",
+      "description": "Array of forms/documents extracted from the combined PDF",
+      "items": {
+        "type": "object",
+        "properties": {
+          "form_type": {"type": "string", "description": "Type of form (Prescription, Patient Application, Lab Result, Insurance Form, etc.)"},
+          "page_number": {"type": "string", "description": "Page number(s) in the PDF"},
+          "form_date": {"type": "string", "description": "Date on the form"},
+          "form_id": {"type": "string", "description": "Form ID, reference number, or tracking number"},
+          
+          "patient_first_name": {"type": "string", "description": "Patient's first name"},
+          "patient_last_name": {"type": "string", "description": "Patient's last name"},
+          "patient_full_name": {"type": "string", "description": "Patient's complete name"},
+          "patient_date_of_birth": {"type": "string", "description": "Patient's date of birth"},
+          "patient_age": {"type": "string", "description": "Patient's age"},
+          "patient_gender": {"type": "string", "description": "Patient's gender"},
+          "patient_mrn": {"type": "string", "description": "Medical Record Number"},
+          "patient_ssn_last4": {"type": "string", "description": "Last 4 digits of SSN"},
+          "patient_address": {"type": "string", "description": "Patient's street address"},
+          "patient_city": {"type": "string", "description": "Patient's city"},
+          "patient_state": {"type": "string", "description": "Patient's state"},
+          "patient_zip": {"type": "string", "description": "Patient's ZIP code"},
+          "patient_country": {"type": "string", "description": "Patient's country"},
+          "patient_phone": {"type": "string", "description": "Patient's phone number"},
+          "patient_mobile": {"type": "string", "description": "Patient's mobile number"},
+          "patient_email": {"type": "string", "description": "Patient's email address"},
+          "patient_weight": {"type": "string", "description": "Patient's weight"},
+          "patient_height": {"type": "string", "description": "Patient's height"},
+          "patient_allergies": {"type": "string", "description": "Known allergies"},
+          
+          "prescriber_name": {"type": "string", "description": "Prescribing doctor's name"},
+          "prescriber_npi": {"type": "string", "description": "Prescriber's NPI number"},
+          "prescriber_dea": {"type": "string", "description": "Prescriber's DEA number"},
+          "prescriber_license": {"type": "string", "description": "Prescriber's medical license number"},
+          "prescriber_specialty": {"type": "string", "description": "Prescriber's medical specialty"},
+          "prescriber_phone": {"type": "string", "description": "Prescriber's phone number"},
+          "prescriber_fax": {"type": "string", "description": "Prescriber's fax number"},
+          "prescriber_email": {"type": "string", "description": "Prescriber's email"},
+          "prescriber_signature": {"type": "string", "description": "Whether signature is present (Yes/No)"},
+          "prescriber_signature_date": {"type": "string", "description": "Date of prescriber signature"},
+          
+          "facility_name": {"type": "string", "description": "Hospital or clinic name"},
+          "facility_address": {"type": "string", "description": "Facility street address"},
+          "facility_city": {"type": "string", "description": "Facility city"},
+          "facility_state": {"type": "string", "description": "Facility state"},
+          "facility_zip": {"type": "string", "description": "Facility ZIP code"},
+          "facility_phone": {"type": "string", "description": "Facility phone number"},
+          "facility_fax": {"type": "string", "description": "Facility fax number"},
+          "facility_npi": {"type": "string", "description": "Facility NPI number"},
+          "department": {"type": "string", "description": "Department name"},
+          
+          "diagnosis_primary": {"type": "string", "description": "Primary diagnosis"},
+          "diagnosis_icd10_code": {"type": "string", "description": "ICD-10 diagnosis code"},
+          "diagnosis_secondary": {"type": "string", "description": "Secondary diagnosis"},
+          "medical_condition": {"type": "string", "description": "Medical condition being treated"},
+          
+          "medications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "drug_name": {"type": "string", "description": "Medication name"},
+                "drug_strength": {"type": "string", "description": "Medication strength (e.g., 10mg)"},
+                "drug_form": {"type": "string", "description": "Form (tablet, capsule, injection, etc.)"},
+                "quantity": {"type": "string", "description": "Quantity prescribed"},
+                "days_supply": {"type": "string", "description": "Days supply"},
+                "refills": {"type": "string", "description": "Number of refills"},
+                "directions": {"type": "string", "description": "Dosage instructions/SIG"},
+                "frequency": {"type": "string", "description": "How often to take"},
+                "route": {"type": "string", "description": "Route of administration"},
+                "ndc_code": {"type": "string", "description": "National Drug Code"},
+                "dispense_as_written": {"type": "string", "description": "DAW indicator (Yes/No)"}
+              }
+            }
+          },
+          
+          "insurance_company": {"type": "string", "description": "Insurance company name"},
+          "insurance_plan": {"type": "string", "description": "Insurance plan name"},
+          "insurance_member_id": {"type": "string", "description": "Insurance member ID"},
+          "insurance_group_number": {"type": "string", "description": "Insurance group number"},
+          "insurance_bin": {"type": "string", "description": "Insurance BIN number"},
+          "insurance_pcn": {"type": "string", "description": "Insurance PCN"},
+          "insurance_phone": {"type": "string", "description": "Insurance company phone"},
+          "policy_holder_name": {"type": "string", "description": "Name of policy holder"},
+          "policy_holder_dob": {"type": "string", "description": "Policy holder date of birth"},
+          "policy_holder_relationship": {"type": "string", "description": "Patient's relationship to policy holder"},
+          
+          "pharmacy_name": {"type": "string", "description": "Pharmacy name"},
+          "pharmacy_address": {"type": "string", "description": "Pharmacy address"},
+          "pharmacy_phone": {"type": "string", "description": "Pharmacy phone number"},
+          "pharmacy_fax": {"type": "string", "description": "Pharmacy fax number"},
+          "pharmacy_npi": {"type": "string", "description": "Pharmacy NPI"},
+          "pharmacist_name": {"type": "string", "description": "Pharmacist name"},
+          
+          "lab_test_name": {"type": "string", "description": "Laboratory test name"},
+          "lab_test_date": {"type": "string", "description": "Date of lab test"},
+          "lab_result_value": {"type": "string", "description": "Lab test result value"},
+          "lab_result_unit": {"type": "string", "description": "Unit of measurement"},
+          "lab_reference_range": {"type": "string", "description": "Normal reference range"},
+          "lab_facility": {"type": "string", "description": "Lab facility name"},
+          "lab_notes": {"type": "string", "description": "Lab notes or comments"},
+          
+          "prior_auth_number": {"type": "string", "description": "Prior authorization number"},
+          "prior_auth_status": {"type": "string", "description": "Prior auth status (Approved/Pending/Denied)"},
+          "prior_auth_date": {"type": "string", "description": "Prior auth date"},
+          "prior_auth_expiry": {"type": "string", "description": "Prior auth expiration date"},
+          
+          "program_name": {"type": "string", "description": "Patient assistance program name"},
+          "program_enrollment_date": {"type": "string", "description": "Program enrollment date"},
+          "program_id": {"type": "string", "description": "Program enrollment ID"},
+          
+          "consent_obtained": {"type": "string", "description": "Patient consent obtained (Yes/No)"},
+          "consent_date": {"type": "string", "description": "Date consent was signed"},
+          "hipaa_authorization": {"type": "string", "description": "HIPAA authorization signed (Yes/No)"},
+          
+          "notes": {"type": "string", "description": "Additional notes or comments on the form"},
+          "special_instructions": {"type": "string", "description": "Special instructions or requirements"},
+          "follow_up_date": {"type": "string", "description": "Follow-up appointment date"},
+          "follow_up_instructions": {"type": "string", "description": "Follow-up care instructions"}
+        }
+      }
+    },
+    "extraction_summary": {
+      "type": "object",
+      "properties": {
+        "total_forms_found": {"type": "number", "description": "Total number of forms detected"},
+        "total_pages": {"type": "number", "description": "Total pages processed"},
+        "form_types_found": {"type": "string", "description": "List of form types identified"},
+        "total_medications": {"type": "number", "description": "Total medications found across all forms"},
+        "total_patients": {"type": "number", "description": "Unique patients identified"}
+      }
+    }
+  }
+}

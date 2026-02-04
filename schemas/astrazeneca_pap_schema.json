@@ -1,0 +1,157 @@
+{
+  "type": "object",
+  "properties": {
+    "form_information": {
+      "type": "object",
+      "properties": {
+        "form_name": {"type": "string", "description": "Name of the form (e.g., AZ&Me Patient Assistance Program)"},
+        "form_version": {"type": "string", "description": "Form version or revision date"},
+        "form_date": {"type": "string", "description": "Date form was completed"},
+        "form_fax_number": {"type": "string", "description": "Fax number to submit the form"},
+        "program_phone": {"type": "string", "description": "Program phone number"},
+        "program_website": {"type": "string", "description": "Program website URL"}
+      }
+    },
+    "patient_information": {
+      "type": "object",
+      "properties": {
+        "patient_first_name": {"type": "string", "description": "Patient first name"},
+        "patient_middle_name": {"type": "string", "description": "Patient middle name or initial"},
+        "patient_last_name": {"type": "string", "description": "Patient last name"},
+        "patient_date_of_birth": {"type": "string", "description": "Patient date of birth"},
+        "patient_gender": {"type": "string", "description": "Patient gender (Male/Female)"},
+        "patient_ssn_last4": {"type": "string", "description": "Last 4 digits of patient SSN"},
+        "patient_address_street": {"type": "string", "description": "Patient street address"},
+        "patient_address_apt": {"type": "string", "description": "Patient apartment/suite number"},
+        "patient_city": {"type": "string", "description": "Patient city"},
+        "patient_state": {"type": "string", "description": "Patient state"},
+        "patient_zip": {"type": "string", "description": "Patient ZIP code"},
+        "patient_phone_home": {"type": "string", "description": "Patient home phone"},
+        "patient_phone_cell": {"type": "string", "description": "Patient cell phone"},
+        "patient_email": {"type": "string", "description": "Patient email address"},
+        "patient_preferred_language": {"type": "string", "description": "Patient preferred language"},
+        "patient_us_resident": {"type": "string", "description": "Is patient a US resident (Yes/No)"},
+        "patient_caregiver_name": {"type": "string", "description": "Caregiver or authorized representative name"},
+        "patient_caregiver_phone": {"type": "string", "description": "Caregiver phone number"},
+        "patient_caregiver_relationship": {"type": "string", "description": "Relationship to patient"}
+      }
+    },
+    "income_information": {
+      "type": "object",
+      "properties": {
+        "household_size": {"type": "string", "description": "Number of people in household"},
+        "annual_household_income": {"type": "string", "description": "Total annual household income"},
+        "income_source": {"type": "string", "description": "Source of income"},
+        "employment_status": {"type": "string", "description": "Employment status"},
+        "tax_filing_status": {"type": "string", "description": "Tax filing status"},
+        "receives_government_assistance": {"type": "string", "description": "Receives government assistance (Yes/No)"},
+        "assistance_programs": {"type": "string", "description": "List of government assistance programs"}
+      }
+    },
+    "insurance_information": {
+      "type": "object",
+      "properties": {
+        "has_insurance": {"type": "string", "description": "Does patient have insurance (Yes/No)"},
+        "insurance_type": {"type": "string", "description": "Type of insurance (Commercial, Medicare, Medicaid, etc.)"},
+        "insurance_company_name": {"type": "string", "description": "Insurance company name"},
+        "insurance_plan_name": {"type": "string", "description": "Insurance plan name"},
+        "insurance_member_id": {"type": "string", "description": "Insurance member ID"},
+        "insurance_group_number": {"type": "string", "description": "Insurance group number"},
+        "insurance_bin": {"type": "string", "description": "Insurance BIN"},
+        "insurance_pcn": {"type": "string", "description": "Insurance PCN"},
+        "insurance_phone": {"type": "string", "description": "Insurance company phone"},
+        "has_medicare": {"type": "string", "description": "Has Medicare coverage (Yes/No)"},
+        "medicare_part_d": {"type": "string", "description": "Has Medicare Part D (Yes/No)"},
+        "has_medicaid": {"type": "string", "description": "Has Medicaid coverage (Yes/No)"},
+        "has_tricare": {"type": "string", "description": "Has TRICARE/VA coverage (Yes/No)"},
+        "coverage_denied": {"type": "string", "description": "Was coverage denied for medication (Yes/No)"},
+        "denial_reason": {"type": "string", "description": "Reason for coverage denial"}
+      }
+    },
+    "prescriber_information": {
+      "type": "object",
+      "properties": {
+        "prescriber_first_name": {"type": "string", "description": "Prescriber first name"},
+        "prescriber_last_name": {"type": "string", "description": "Prescriber last name"},
+        "prescriber_credentials": {"type": "string", "description": "Prescriber credentials (MD, DO, NP, PA)"},
+        "prescriber_npi": {"type": "string", "description": "Prescriber NPI number"},
+        "prescriber_state_license": {"type": "string", "description": "State license number"},
+        "prescriber_dea": {"type": "string", "description": "DEA number"},
+        "prescriber_specialty": {"type": "string", "description": "Medical specialty"},
+        "prescriber_phone": {"type": "string", "description": "Prescriber phone number"},
+        "prescriber_fax": {"type": "string", "description": "Prescriber fax number"},
+        "prescriber_email": {"type": "string", "description": "Prescriber email"},
+        "prescriber_signature_present": {"type": "string", "description": "Is prescriber signature present (Yes/No)"},
+        "prescriber_signature_date": {"type": "string", "description": "Date of prescriber signature"}
+      }
+    },
+    "facility_information": {
+      "type": "object",
+      "properties": {
+        "facility_name": {"type": "string", "description": "Practice/Facility name"},
+        "facility_address": {"type": "string", "description": "Facility street address"},
+        "facility_city": {"type": "string", "description": "Facility city"},
+        "facility_state": {"type": "string", "description": "Facility state"},
+        "facility_zip": {"type": "string", "description": "Facility ZIP code"},
+        "facility_phone": {"type": "string", "description": "Facility main phone"},
+        "facility_fax": {"type": "string", "description": "Facility fax number"},
+        "facility_npi": {"type": "string", "description": "Facility/Group NPI"},
+        "facility_tax_id": {"type": "string", "description": "Facility Tax ID"},
+        "office_contact_name": {"type": "string", "description": "Office contact person name"},
+        "office_contact_phone": {"type": "string", "description": "Office contact phone"},
+        "office_contact_email": {"type": "string", "description": "Office contact email"}
+      }
+    },
+    "medication_prescription": {
+      "type": "object",
+      "properties": {
+        "medication_name": {"type": "string", "description": "Medication name (XIGDUO XR)"},
+        "medication_strength": {"type": "string", "description": "Medication strength (e.g., 5mg/500mg, 5mg/1000mg, 10mg/500mg, 10mg/1000mg)"},
+        "quantity": {"type": "string", "description": "Quantity to dispense"},
+        "days_supply": {"type": "string", "description": "Days supply"},
+        "refills": {"type": "string", "description": "Number of refills"},
+        "directions": {"type": "string", "description": "Dosing instructions/SIG"},
+        "dispense_as_written": {"type": "string", "description": "Dispense as written (Yes/No)"},
+        "start_date": {"type": "string", "description": "Therapy start date"},
+        "diagnosis": {"type": "string", "description": "Diagnosis/Condition"},
+        "icd10_code": {"type": "string", "description": "ICD-10 diagnosis code"},
+        "is_new_therapy": {"type": "string", "description": "Is this a new therapy (Yes/No)"},
+        "prior_medications": {"type": "string", "description": "Prior diabetes medications tried"}
+      }
+    },
+    "shipping_information": {
+      "type": "object",
+      "properties": {
+        "ship_to": {"type": "string", "description": "Ship to (Patient/Prescriber Office)"},
+        "shipping_address": {"type": "string", "description": "Shipping street address"},
+        "shipping_city": {"type": "string", "description": "Shipping city"},
+        "shipping_state": {"type": "string", "description": "Shipping state"},
+        "shipping_zip": {"type": "string", "description": "Shipping ZIP code"},
+        "shipping_phone": {"type": "string", "description": "Phone for shipping contact"},
+        "delivery_instructions": {"type": "string", "description": "Special delivery instructions"}
+      }
+    },
+    "attestations_and_consent": {
+      "type": "object",
+      "properties": {
+        "patient_attestation_signed": {"type": "string", "description": "Patient attestation signed (Yes/No)"},
+        "patient_signature_date": {"type": "string", "description": "Date of patient signature"},
+        "hipaa_authorization_signed": {"type": "string", "description": "HIPAA authorization signed (Yes/No)"},
+        "income_verification_consent": {"type": "string", "description": "Income verification consent (Yes/No)"},
+        "prescriber_attestation_signed": {"type": "string", "description": "Prescriber attestation signed (Yes/No)"},
+        "prescriber_confirms_medical_necessity": {"type": "string", "description": "Prescriber confirms medical necessity (Yes/No)"},
+        "substitution_permitted": {"type": "string", "description": "Substitution permitted (Yes/No)"}
+      }
+    },
+    "additional_information": {
+      "type": "object",
+      "properties": {
+        "how_heard_about_program": {"type": "string", "description": "How patient heard about the program"},
+        "additional_notes": {"type": "string", "description": "Additional notes or comments"},
+        "urgent_request": {"type": "string", "description": "Is this an urgent request (Yes/No)"},
+        "renewal_request": {"type": "string", "description": "Is this a renewal request (Yes/No)"},
+        "previous_enrollment_id": {"type": "string", "description": "Previous enrollment ID if renewal"}
+      }
+    }
+  }
+}

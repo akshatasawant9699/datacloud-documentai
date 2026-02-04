@@ -1,0 +1,467 @@
+<template>
+    <lightning-record-edit-form object-api-name="Opportunity" record-type-id={recordTypeId} onsubmit={handleSubmit}>
+        <lightning-layout multiple-rows="true">
+            <lightning-layout-item size="12">
+                <c-block-button-group
+                    picklist-field-api-name="DealType__c"
+                    object-api-name="Opportunity"
+                    record-type-name={recordTypeName}
+                    value={DealType__c}
+                    required
+                    onselect={handleDealTypeSelected}
+                >
+                    <c-lwc-tool-tip slot="toolTip">
+                        <p style="margin-bottom: 0.5rem">
+                            <strong>New Client Deal:</strong> New revenue stream for new/existing client e.g new
+                            country, product not related to existing deal
+                        </p>
+
+                        <p style="margin-bottom: 0.5rem">
+                            <strong>Incremental Deal:</strong> Extending existing facility/deal. Additional tx, country,
+                            increased limit/balances, new accounts
+                        </p>
+
+                        <p style="margin-bottom: 0.5rem">
+                            <strong>Rebid/Repricing:</strong> Sales effort to maintain existing rev. stream, possibly
+                            changed conditions, e.g. re/up-price, higher margin/fee without vol. change
+                        </p>
+
+                        <p>
+                            Enter significant incremental element of rebid as separate incr. deal by cloning the rebid.
+                            No double counting of revs (rebid+inc).
+                        </p>
+                    </c-lwc-tool-tip>
+                </c-block-button-group>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label">
+                        <abbr class="slds-required" title="required">* </abbr>{labels.fieldName}
+                    </label>
+                    <div class="slds-form-element__control">
+                        <lightning-input
+                            variant="label-hidden"
+                            title="name"
+                            required
+                            onchange={handleNameChanged}
+                        ></lightning-input>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <lightning-input-field field-name="AccountId" required></lightning-input-field>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <lightning-input-field field-name="CurrencyIsoCode" required></lightning-input-field>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label">
+                        <abbr class="slds-required" title="required">* </abbr>{labels.fieldEstimatedWinDate}
+                    </label>
+                    <lightning-input-field
+                        field-name="CloseDate"
+                        required
+                        variant="label-hidden"
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label">
+                        <abbr class="slds-required" title="required">* </abbr>{labels.fieldAmount}
+                    </label>
+                    <c-lwc-tool-tip above="true">
+                        For RMS, please enter Revenue Credits.  For all others, enter best revenue estimate of the first 12 months including any upfront/onetime fees
+                        </c-lwc-tool-tip>
+                    <div class="slds-form-element__control">
+                        <lightning-input
+                            type="number"
+                            required
+                            variant="label-hidden"
+                            onchange={handleAmountChange}
+                        ></lightning-input>
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <lightning-input-field field-name="CampaignId"></lightning-input-field>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6">
+                <div class="slds-form-element slds-form-element_stacked">
+                    <label class="slds-form-element__label">
+                        <abbr class="slds-required" title="required">* </abbr> {labels.fieldOverview}
+                    </label>
+                    <c-lwc-tool-tip above="true">
+                        Short description which provides an overview of the deal size details (revenue calculations, expected utilisation) and benefit to the client. This will be included in Senior Management reporting.
+                        </c-lwc-tool-tip>
+                    <div class="slds-form-element__control">
+                        <lightning-input-field field-name="Description" variant="label-hidden" required></lightning-input-field> 
+                    </div>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" class="slds-align_absolute-center left-justify">
+                <lightning-layout multiple-rows="true" vertical-align="stretch" class="slds-m-left_medium">
+                    <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium">
+                        <span class="slds-form-element__label"
+                            ><abbr class="slds-required" title="required">* </abbr>{labels.fieldESG}</span
+                        >
+                        <c-lwc-tool-tip above="true" right="true">
+                            Deal contains ESG-related features along P1-Use of Proceeds (green or social assets),
+                            P2-Company Profile (entire company derives >=90% of its revenues from activities eligible
+                            under DB’s Sustainable Finance Framework), or P3-KPI linked structures (e.g. the company’s
+                            CO2 emissions or use of renewable energy, or sustainability performance in Supply Chain
+                            Financing)
+                        </c-lwc-tool-tip>
+                    </lightning-layout-item>
+                    <lightning-layout-item
+                        size="4"
+                        medium-device-size="4"
+                        class="slds-m-bottom_medium slds-var-p-left_x-small"
+                    >
+                        <lightning-input
+                            type="toggle"
+                            data-field="ESGDeal__c"
+                            variant="label-hidden"
+                            name="ESGDeal__c"
+                            message-toggle-active=""
+                            message-toggle-inactive=""
+                            onchange={handleToggleChange}
+                        ></lightning-input>
+                    </lightning-layout-item>
+                    <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium">
+                        <span class="slds-form-element__label">{labels.fieldRFP}</span>
+                    </lightning-layout-item>
+                    <lightning-layout-item
+                        size="4"
+                        medium-device-size="4"
+                        class="slds-m-bottom_medium slds-var-p-left_x-small"
+                    >
+                        <lightning-input
+                            type="toggle"
+                            data-field="RFP__c"
+                            name="RFP__c"
+                            message-toggle-active=""
+                            message-toggle-inactive=""
+                            onchange={handleToggleChange}
+                            variant="label-hidden"
+                        ></lightning-input>
+                    </lightning-layout-item>
+
+                    <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium" if:true={isNonRiskICMDealTemplate}>
+                        <span class="slds-form-element__label">GCS Team Involved</span>
+                    </lightning-layout-item>
+                    <lightning-layout-item
+                        size="4"
+                        medium-device-size="4"
+                        class="slds-m-bottom_medium slds-var-p-left_x-small"
+                        if:true={isNonRiskICMDealTemplate}
+                    >
+                        <lightning-input
+                            type="toggle"
+                            data-field="GCSTeamInvolved__c"
+                            variant="label-hidden"
+                            checked={GCSToggle}
+                            name="GCSTeamInvolved__c"
+                            message-toggle-active=""
+                            message-toggle-inactive=""
+                            onchange={handleGCSToggleChange}
+                        ></lightning-input>
+                        <lightning-input-field
+                            field-name="GCSTeamInvolved__c"
+                            value={gcsValue}
+                            class="slds-hide"
+                        >
+                        </lightning-input-field>
+                    </lightning-layout-item>
+
+
+                </lightning-layout>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={requiresDealSource}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-hide">
+                        <lightning-input-field
+                            value={DealSource__c}
+                            field-name="DealSource__c"
+                            required
+                            data-test-id="deal-source"
+                            class="slds-hide"
+                        ></lightning-input-field>
+                    </div>
+                    <lightning-combobox
+                        options={picklistValues}
+                        label="Deal Source"
+                        required
+                        value={DealSource__c}
+                        dropdown-alignment="bottom-left"
+                        onchange={handleDealSourceChange}
+                    >
+                    </lightning-combobox>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={requiresDealSource}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={DealSourcePerson__c}
+                        field-name="DealSourcePerson__c"
+                        data-field="DealSourcePerson__c"
+                        onchange={handleSourcePersonChange}
+                        required
+                        data-test-id="deal-source-person"
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={requiresDealLogNAReason}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <div class="slds-hide">
+                        <lightning-input-field
+                            value={DealLogNAReason__c}
+                            field-name="DealLogNAReason__c"
+                            required
+                            class="slds-hide"
+                            onchange={handleDealLogReasonChange}
+                        ></lightning-input-field>
+                    </div>
+                    <lightning-combobox
+                        options={dealLogReasonPicklistValues}
+                        label="Deal Log N/A Reason"
+                        required
+                        value={DealLogNAReason__c}
+                        dropdown-alignment="bottom-left"
+                        onchange={handleDealLogReasonChange}
+                    >
+                    </lightning-combobox>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={otherDealLogReasonRequired}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={IfOtherDealLogThenSpecify__c}
+                        field-name="IfOtherDealLogThenSpecify__c"
+                        required={otherDealLogReasonRequired}
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={cruiseDealIdRequired}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={CRUISeDealId__c}
+                        field-name="CRUISeDealId__c"
+                        required={cruiseDealIdRequired}
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={isAtRiskDealTemplate}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={BusinessatRiskDate__c}
+                        field-name="BusinessatRiskDate__c"
+                        required
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={isAtRiskDealTemplate}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={BusinessatRiskReason__c}
+                        field-name="BusinessatRiskReason__c"
+                        required
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+            <lightning-layout-item size="12" medium-device-size="6" if:true={isAtRiskDealTemplate}>
+                <div class="slds-form-element slds-form-element_stacked">
+                    <lightning-input-field
+                        value={CurrentAnnualRevenue__c}
+                        field-name="CurrentAnnualRevenue__c"
+                        required
+                    ></lightning-input-field>
+                </div>
+            </lightning-layout-item>
+        </lightning-layout>
+        <c-lwc-expandable-section title="Rebid Attributes" not-expandable if:true={isAtRiskRebid}>
+            <lightning-layout>
+                <lightning-layout-item size="12" medium-device-size="6">
+                    <div class="slds-form-element slds-form-element_stacked">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required">* </abbr>
+                            {labels.fieldRebid}
+                            <span
+                                >&nbsp;(Variance:&nbsp;
+                                <lightning-formatted-number maximum-fraction-digits="0" value={variance}>
+                                </lightning-formatted-number>
+                                )
+                                <lightning-icon
+                                    icon-name="utility:info"
+                                    size="x-small"
+                                    onmouseover={focusMessage}
+                                    onmouseout={hideMessage}
+                                ></lightning-icon>
+                                <div
+                                    lwc:ref="message"
+                                    class="slds-popover slds-popover_tooltip slds-nubbin_top slds-fall-into-ground"
+                                    role="tooltip"
+                                    id="help"
+                                    style="
+                                        position: absolute;
+                                        top: 2.5rem;
+                                        left: 5.85rem;
+                                        visibility: hidden;
+                                        opacity: 100%;
+                                    "
+                                >
+                                    <div class="slds-popover__body">
+                                        <lightning-formatted-text value={rebidHelpText}></lightning-formatted-text>
+                                    </div>
+                                </div>
+                            </span>
+                        </label>
+                        <lightning-input
+                            type="number"
+                            onchange={handleRebidChange}
+                            variant="label-hidden"
+                            required
+                        ></lightning-input>
+                    </div>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="6">
+                    <div class="slds-form-element slds-form-element_stacked">
+                        <label class="slds-form-element__label"> {labels.fieldRebidAtRisk} </label>
+                        <div class="slds-form-element__control">
+                            <lightning-input
+                                type="toggle"
+                                data-field="RebidAtRisk__c"
+                                variant="label-hidden"
+                                name="RebidAtRisk__c"
+                                message-toggle-active=""
+                                message-toggle-inactive=""
+                                onchange={handleToggleChange}
+                            ></lightning-input>
+                        </div>
+                    </div>
+                </lightning-layout-item>
+            </lightning-layout>
+        </c-lwc-expandable-section>
+        <c-lwc-expandable-section title="Implementation Set Up" if:true={showAdditionalFields}>
+            <lightning-layout multiple-rows="true">
+                <lightning-layout-item size="6">
+                    <lightning-layout vertical-align="stretch" class="slds-m-left_xx-small">
+                        <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium">
+                            <span class="slds-form-element__label">{labelImplementationNeeded}</span>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="4" medium-device-size="4" class="slds-m-bottom_medium">
+                            <lightning-input
+                                type="toggle"
+                                data-field="ImplementationNeeded__c"
+                                checked={isImplementationNeeded}
+                                message-toggle-active=""
+                                message-toggle-inactive=""
+                                variant="label-hidden"
+                                onchange={handleToggleChange}
+                            ></lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-layout-item>
+                <lightning-layout-item size="6">
+                    <lightning-layout vertical-align="stretch" class="slds-m-left_medium">
+                        <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium">
+                            <span class="slds-form-element__label">{labelAccountCreationRequired}</span>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="4" medium-device-size="4" class="slds-m-bottom_medium">
+                            <lightning-input
+                                type="toggle"
+                                data-field="AccountCreationRequired__c"
+                                message-toggle-active=""
+                                message-toggle-inactive=""
+                                checked={isAccountCreationRequired}
+                                onchange={handleToggleChange}
+                                label={labelAccountCreationRequired}
+                                variant="label-hidden"
+                            ></lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-layout-item>
+                <lightning-layout-item size="12" medium-device-size="6">
+                    <div class="slds-form-element slds-form-element_stacked">
+                        <label class="slds-form-element__label">
+                            <abbr class="slds-required" title="required"></abbr>{labels.fieldImpLeadTeam}
+                        </label>
+                        <c-lwc-tool-tip above="true">
+                            To search please enter 3 letters of the country or dedicated name of the intended implementation team e.g. Germany, UK -, Netherlands, FXPlatform.
+                            </c-lwc-tool-tip>
+                        <div class="slds-form-element__control">
+                            <lightning-input-field
+                            field-name="ImplementationLeadTeam__c"
+                            data-field="ImplementationLeadTeam__c"
+                            disabled={isImplementationNotNeeded}
+                            variant="label-hidden"
+                        ></lightning-input-field>
+                        </div>
+                    </div>
+                </lightning-layout-item>
+                <lightning-layout-item size="6">
+                    <lightning-layout vertical-align="stretch" class="slds-m-left_medium slds-m-top_large">
+                        <lightning-layout-item size="8" medium-device-size="8" class="slds-m-bottom_medium">
+                            <span class="slds-form-element__label">{labelCreditFacilityRequired}</span>
+                        </lightning-layout-item>
+                        <lightning-layout-item size="4" medium-device-size="4" class="slds-m-bottom_medium">
+                            <lightning-input
+                                type="toggle"
+                                data-field="CreditFacilityRequired__c"
+                                checked={isCreditFacilityRequired}
+                                message-toggle-active=""
+                                message-toggle-inactive=""
+                                onchange={handleToggleChange}
+                                variant="label-hidden"
+                            ></lightning-input>
+                        </lightning-layout-item>
+                    </lightning-layout>
+                </lightning-layout-item>
+            </lightning-layout>
+        </c-lwc-expandable-section>
+        <div class="slds-hide">
+            <lightning-input-field value={Name} field-name="Name" required></lightning-input-field>
+            <lightning-input-field value={Amount} field-name="Amount" required></lightning-input-field>
+            <lightning-input-field value={ESGDeal__c} field-name="ESGDeal__c" required></lightning-input-field>
+            <lightning-input-field value={DealType__c} field-name="DealType__c" required></lightning-input-field>
+            <lightning-input-field value={RFP__c} field-name="RFP__c"></lightning-input-field>
+            <lightning-input-field value={AtRiskDeal__c} field-name="AtRiskDeal__c"></lightning-input-field>
+            <lightning-input-field
+                value={RebidCurrentValue__c}
+                field-name="RebidCurrentValue__c"
+                required
+            ></lightning-input-field>
+            <lightning-input-field value={RebidAtRisk__c} field-name="RebidAtRisk__c"></lightning-input-field>
+            <lightning-input-field
+                value={AddProductSelectionFilter__c}
+                field-name="AddProductSelectionFilter__c"
+            ></lightning-input-field>
+            <lightning-input-field
+                value={CreditFacilityRequired__c}
+                field-name="CreditFacilityRequired__c"
+            ></lightning-input-field>
+            <lightning-input-field
+                value={AccountCreationRequired__c}
+                field-name="AccountCreationRequired__c"
+            ></lightning-input-field>
+            <lightning-input-field
+                value={ImplementationNeeded__c}
+                field-name="ImplementationNeeded__c"
+            ></lightning-input-field>
+            <lightning-input-field field-name="StageName" value={StageName} required></lightning-input-field>
+            <lightning-input-field value={SubStageName__c} field-name="SubStageName__c"></lightning-input-field>
+            <lightning-input-field
+                field-name="TradingAreaL1__c"
+                value={TradingAreaL1__c}
+                required
+            ></lightning-input-field>
+            <lightning-input-field
+                field-name="TradingAreaL2__c"
+                value={TradingAreaL2__c}
+                required
+            ></lightning-input-field>
+            <button type="submit" label="submit" class="slds-hide"></button>
+        </div>
+    </lightning-record-edit-form>
+</template>

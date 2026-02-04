@@ -1,0 +1,59 @@
+{
+  "extractMultiple": true,
+  "type": "object",
+  "properties": {
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "document_page_number": {"type": "string", "description": "Page number of this document section"},
+          
+          "form_title": {"type": "string", "description": "Title at top of page"},
+          
+          "patient_first_name": {"type": "string", "description": "Patient First Name"},
+          "patient_last_name": {"type": "string", "description": "Patient Last Name"},
+          "patient_dob": {"type": "string", "description": "Patient Date of Birth"},
+          "patient_address": {"type": "string", "description": "Patient Street Address"},
+          "patient_city": {"type": "string", "description": "Patient City"},
+          "patient_state": {"type": "string", "description": "Patient State"},
+          "patient_zip": {"type": "string", "description": "Patient Zip Code"},
+          "patient_phone": {"type": "string", "description": "Patient Phone Number"},
+          "patient_email": {"type": "string", "description": "Patient Email"},
+          "patient_gender": {"type": "string", "description": "Patient Gender"},
+          "patient_income": {"type": "string", "description": "Annual Household Income"},
+          "household_size": {"type": "string", "description": "Number in Household"},
+
+          "facility_npi": {"type": "string", "description": "Facility NPI (from Prescriber Information section)"},
+          "facility_name": {"type": "string", "description": "Facility Name (from Prescriber Information section)"},
+          "hcp_first_name": {"type": "string", "description": "HCP First Name"},
+          "hcp_last_name": {"type": "string", "description": "HCP Last Name"},
+          "hcp_npi": {"type": "string", "description": "HCP NPI"},
+          "hcp_address": {"type": "string", "description": "Address (Prescriber Information)"},
+          "hcp_suite": {"type": "string", "description": "Suite No"},
+          "hcp_city": {"type": "string", "description": "City (Prescriber Information)"},
+          "hcp_state": {"type": "string", "description": "State (Prescriber Information)"},
+          "hcp_zip": {"type": "string", "description": "Zip (Prescriber Information)"},
+          "hcp_phone": {"type": "string", "description": "HCP Phone"},
+          "hcp_fax": {"type": "string", "description": "HCP Fax"},
+
+          "office_contact_name": {"type": "string", "description": "OC First Name"},
+          "office_contact_last_name": {"type": "string", "description": "OC Last Name"},
+          "office_contact_phone": {"type": "string", "description": "OC Phone"},
+          "office_contact_extension": {"type": "string", "description": "Extension number next to OC Phone"},
+          "office_contact_email": {"type": "string", "description": "Office Contact Email"},
+
+          "rx_patient_name": {"type": "string", "description": "Patient First Name (from Prescription section)"},
+          "rx_medication": {"type": "string", "description": "Medication"},
+          "rx_is_5mg_500mg": {"type": "string", "description": "Is 5mg/500mg checkbox selected? (Yes/No)"},
+          "rx_is_5mg_1000mg": {"type": "string", "description": "Is 5mg/1000mg checkbox selected? (Yes/No)"},
+          "rx_is_10mg_500mg": {"type": "string", "description": "Is 10mg/500mg checkbox selected? (Yes/No)"},
+          "rx_is_10mg_1000mg": {"type": "string", "description": "Is 10mg/1000mg checkbox selected? (Yes/No)"},
+          "rx_quantity": {"type": "string", "description": "Quantity"},
+          "rx_directions": {"type": "string", "description": "Directions"},
+          "rx_refills": {"type": "string", "description": "Refills"}
+        }
+      }
+    }
+  }
+}
